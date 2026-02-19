@@ -297,6 +297,9 @@ ax1.set_ylim(current_ylim[0], current_ylim[1] * 1.15)  # Add 15% headroom
 # --------------------------------------------------
 # Internal Metrics Box (Positioned inside plot)
 # --------------------------------------------------
+# --------------------------------------------------
+# Internal Metrics Box (Positioned inside plot with proper margins)
+# --------------------------------------------------
 textstr = (
     f"TIME IN RANGE\n"
     f"TIR (70-180): {tir:.1f}%\n"
@@ -324,11 +327,11 @@ textstr = (
     f"Readings/day: {readings_per_day:.0f}"
 )
 
-# Position the text box in the upper right corner of the plot
-# Use axes coordinates (0 to 1) for reliable positioning
-plt.gcf().text(0.78, 0.88, textstr, fontsize=9,
-               bbox=dict(boxstyle="round", facecolor='white', alpha=0.55,
-                        edgecolor='gray', linewidth=1),
+# Position the text box with proper margins from plot edges
+# Use axes coordinates (0 to 1) with margins
+plt.gcf().text(0.75, 0.92, textstr, fontsize=9,
+               bbox=dict(boxstyle="round", facecolor='white', alpha=0.49,
+                        edgecolor='gray', linewidth=1, pad=0.8),  # Added padding inside box
                verticalalignment='top',
                horizontalalignment='left',
                transform=ax1.transAxes)  # Use axes coordinates
@@ -336,7 +339,8 @@ plt.gcf().text(0.78, 0.88, textstr, fontsize=9,
 # Adjust legend position to avoid overlapping with metrics box
 lines1, labels1 = ax1.get_legend_handles_labels()
 lines2, labels2 = ax2.get_legend_handles_labels()
-ax1.legend(lines1 + lines2, labels1 + labels2, loc="upper left", fontsize=10)
+ax1.legend(lines1 + lines2, labels1 + labels2, loc="upper left", fontsize=10, 
+          bbox_to_anchor=(0.02, 0.98))  # Added small margin from left edge
 
 plt.title("Ambulatory Glucose Profile (Full Clinical Version)", fontsize=14, pad=20)
 plt.tight_layout()
