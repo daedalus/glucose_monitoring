@@ -1,4 +1,4 @@
-# Unified Robust AGP + GMI + AUC + Full Clinical Metrics
+# Unified Robust AGP + GMI + AUC + Full Clinical Metrics + TITR
 
 import pandas as pd
 import numpy as np
@@ -8,6 +8,8 @@ from datetime import timedelta
 
 LOW = 70
 HIGH = 180
+TIGHT_LOW = 70
+TIGHT_HIGH = 140  # Tight range upper limit
 BIN_MINUTES = 5
 MIN_SAMPLES_PER_BIN = 5
 ROC_CLIP = 10  # mg/dL/min physiological guardrail
@@ -180,17 +182,23 @@ def compute_risk_indices(values):
 lbgi, hbgi = compute_risk_indices(glucose)
 
 # --------------------------------------------------
-# 9) TIR / TAR / TBR with levels
+# 9) TIR / TAR / TBR / TITR with levels
 # --------------------------------------------------
 total = len(glucose)
 
-# Time in Range
+# Time in Range (Standard: 70-180)
 tir = ((glucose >= LOW) & (glucose <= HIGH)).sum() / total * 100
+
+# Time in Tight Range (70-140) - NEW METRIC
+titr = ((glucose >= TIGHT_LOW) & (glucose <= TIGHT_HIGH)).sum() / total * 100
 
 # Time Above Range (with levels)
 tar_level1 = ((glucose > HIGH) & (glucose <= 250)).sum() / total * 100  # Level 1: 181-250
 tar_level2 = (glucose > 250).sum() / total * 100  # Level 2: >250
 tar = tar_level1 + tar_level2
+
+# Time Above Tight Range (140-180) - supplementary
+tatr = ((glucose > TIGHT_HIGH) & (glucose <= HIGH)).sum() / total * 100
 
 # Time Below Range (with levels)
 tbr_level2 = (glucose < 54).sum() / total * 100  # Level 2: <54 (clinically serious)
@@ -218,6 +226,14 @@ auc_low = np.trapezoid(np.maximum(LOW - values, 0), times)
 days_of_data = (df['Time'].max() - df['Time'].min()).days
 hours_of_data = (df['Time'].max() - df['Time'].min()).total_seconds() / 3600
 readings_per_day = len(df) / days_of_data if days_of_data > 0 else len(df)
+
+# Sensor wear time percentage
+total_possible_readings = days_of_data * (24 * 60 / BIN_MINUTES)  # Theoretical max based on bin size
+wear_percentage = (len(df) / total_possible_readings) * 100 if total_possible_readings > 0 else np.nan
+
+# Severe hypoglycemia events
+severe_hypo_count = (glucose < 40).sum()
+severe_hypo_per_week = (severe_hypo_count / days_of_data) * 7 if days_of_data > 0 else np.nan
 
 # --------------------------------------------------
 # 12) Circadian Binning
@@ -256,25 +272,36 @@ result = result.sort_values("bin")
 result["minutes"] = result["bin"] * BIN_MINUTES
 
 # --------------------------------------------------
-# 13) Plot AGP with Internal Metrics Box
+# 13) Plot AGP with Internal Metrics Box and TITR Band
 # --------------------------------------------------
-fig, ax1 = plt.subplots(figsize=(16, 9))  # Slightly larger figure for better fit
+fig, ax1 = plt.subplots(figsize=(16, 9))
 x = result["minutes"]
 
-# Add target zone highlighting (70-180)
-ax1.axhspan(70, 180, alpha=0.1, color='green', label='Target Range (70-180)')
+# Add target zones with distinct colors and alpha
+ax1.axhspan(TIGHT_LOW, TIGHT_HIGH, alpha=0.15, color='limegreen', 
+            label=f'Tight Target ({TIGHT_LOW}-{TIGHT_HIGH})')
+ax1.axhspan(HIGH, 600, alpha=0.1, color='orange', 
+            label='Above Range (>180)')
+ax1.axhspan(20, LOW, alpha=0.1, color='red', 
+            label='Below Range (<70)')
 
-ax1.fill_between(x, result["p5"], result["p95"], alpha=0.15, label="5–95%")
-ax1.fill_between(x, result["p25"], result["p75"], alpha=0.35, label="IQR")
-ax1.plot(x, result["median"], linewidth=2.5, label="Median")
-ax1.plot(x, result["mean"], linestyle="--", linewidth=1.5, label="Mean")
+# Add the standard target range as a lighter overlay to show the full target
+ax1.axhspan(HIGH, TIGHT_HIGH, alpha=0.1, color='yellowgreen')  # 140-180 zone
 
-ax1.axhline(LOW, linestyle=":", linewidth=1, color='red', alpha=0.5)
-ax1.axhline(HIGH, linestyle=":", linewidth=1, color='red', alpha=0.5)
+# Main AGP elements
+ax1.fill_between(x, result["p5"], result["p95"], alpha=0.15, color='blue', label="5–95%")
+ax1.fill_between(x, result["p25"], result["p75"], alpha=0.35, color='blue', label="IQR")
+ax1.plot(x, result["median"], linewidth=2.5, color='darkblue', label="Median")
+ax1.plot(x, result["mean"], linestyle="--", linewidth=1.5, color='navy', label="Mean")
+
+# Reference lines
+ax1.axhline(LOW, linestyle=":", linewidth=1, color='darkred', alpha=0.5)
+ax1.axhline(HIGH, linestyle=":", linewidth=1, color='darkred', alpha=0.5)
+ax1.axhline(TIGHT_HIGH, linestyle=":", linewidth=1, color='darkgreen', alpha=0.5)
 
 # Shade nighttime hours (10pm - 6am)
-ax1.axvspan(22*60, 24*60, alpha=0.05, color='gray', label='Night Hours')
-ax1.axvspan(0, 6*60, alpha=0.05, color='gray')
+ax1.axvspan(22*60, 24*60, alpha=0.05, color='gray')
+ax1.axvspan(0, 6*60, alpha=0.05, color='gray', label='Night Hours')
 
 ax1.set_xlabel("Time of Day", fontsize=12)
 ax1.set_ylabel("Glucose (mg/dL)", fontsize=12)
@@ -295,20 +322,19 @@ current_ylim = ax1.get_ylim()
 ax1.set_ylim(current_ylim[0], current_ylim[1] * 1.15)  # Add 15% headroom
 
 # --------------------------------------------------
-# Internal Metrics Box (Positioned inside plot)
-# --------------------------------------------------
-# --------------------------------------------------
-# Internal Metrics Box (Positioned inside plot with proper margins)
+# Internal Metrics Box (Positioned inside plot with TITR included)
 # --------------------------------------------------
 textstr = (
     f"TIME IN RANGE\n"
     f"TIR (70-180): {tir:.1f}%\n"
+    f"TITR (70-140): {titr:.1f}%  ← Tight Target\n"
+    f"TATR (140-180): {tatr:.1f}%\n"
     f"TAR >180: {tar:.1f}% (>{HIGH}-250: {tar_level1:.1f}%, >250: {tar_level2:.1f}%)\n"
     f"TBR <70: {tbr:.1f}% (54-69: {tbr_level1:.1f}%, <54: {tbr_level2:.1f}%)\n\n"
     f"GLUCOSE STATS\n"
     f"Mean: {mean_glucose:.1f} mg/dL\n"
     f"GMI: {gmi:.2f}%\n"
-    f"CV: {cv_percent:.1f}%\n"
+    f"CV: {cv_percent:.1f}% {'(Target: <36%)' if cv_percent < 36 else '(Above target)'}\n"
     f"J-Index: {j_index:.1f}\n\n"
     f"VARIABILITY\n"
     f"MAGE: {mage:.1f}\n"
@@ -324,32 +350,44 @@ textstr = (
     f"<{LOW}: {auc_low:.0f}\n\n"
     f"DATA QUALITY\n"
     f"Days: {days_of_data:.1f}\n"
-    f"Readings/day: {readings_per_day:.0f}"
+    f"Readings/day: {readings_per_day:.0f}\n"
+    f"Wear time: {wear_percentage:.1f}%\n"
+    f"Severe hypo/week: {severe_hypo_per_week:.2f}"
 )
 
 # Position the text box with proper margins from plot edges
-# Use axes coordinates (0 to 1) with margins
 plt.gcf().text(0.75, 0.92, textstr, fontsize=9,
                bbox=dict(boxstyle="round", facecolor='white', alpha=0.49,
-                        edgecolor='gray', linewidth=1, pad=0.8),  # Added padding inside box
+                        edgecolor='gray', linewidth=1, pad=0.8),
                verticalalignment='top',
                horizontalalignment='left',
-               transform=ax1.transAxes)  # Use axes coordinates
+               transform=ax1.transAxes)
 
 # Adjust legend position to avoid overlapping with metrics box
 lines1, labels1 = ax1.get_legend_handles_labels()
 lines2, labels2 = ax2.get_legend_handles_labels()
 ax1.legend(lines1 + lines2, labels1 + labels2, loc="upper left", fontsize=10, 
-          bbox_to_anchor=(0.02, 0.98))  # Added small margin from left edge
+          bbox_to_anchor=(0.02, 0.98))
 
-plt.title("Ambulatory Glucose Profile (Full Clinical Version)", fontsize=14, pad=20)
+plt.title("Ambulatory Glucose Profile with Time in Tight Range (TITR)", fontsize=14, pad=20)
 plt.tight_layout()
-plt.savefig("agp_profile_full.png", dpi=300, bbox_inches='tight')
+plt.savefig("agp_profile_with_titr.png", dpi=300, bbox_inches='tight')
 plt.show()
 plt.close()
 
-# Print warning if insufficient data
+# Print clinical interpretations and warnings
+print("\n" + "="*60)
+print("CLINICAL SUMMARY")
+print("="*60)
+print(f"Time in Range (70-180): {tir:.1f}% - {'Target met (≥70%)' if tir >= 70 else 'Below target'}")
+print(f"Time in Tight Range (70-140): {titr:.1f}% - {'Excellent' if titr >= 50 else 'Room for improvement'}")
+print(f"Time Below Range: {tbr:.1f}% - {'Target met (<4%)' if tbr < 4 else 'Above target'}")
+print(f"Glucose Variability (CV): {cv_percent:.1f}% - {'Stable (<36%)' if cv_percent < 36 else 'Unstable (≥36%)'}")
+print("="*60)
+
 if days_of_data < 5:
     print(f"Warning: Only {days_of_data:.1f} days of data. AGP typically requires ≥5 days for reliability.")
 if readings_per_day < 24:
     print(f"Warning: Low reading frequency ({readings_per_day:.0f} readings/day). Continuous glucose monitor expected.")
+if wear_percentage < 70:
+    print(f"Warning: Low sensor wear time ({wear_percentage:.1f}%). Results may not be representative.")
