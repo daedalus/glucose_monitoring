@@ -29,6 +29,74 @@ df["delta_glucose"] = df["Sensor Reading(mg/dL)"].diff()
 df["delta_minutes"] = df["Time"].diff().dt.total_seconds() / 60.0
 df["ROC"] = df["delta_glucose"] / df["delta_minutes"]
 
+
+# -------------------------
+# 4) Variability Metrics
+# -------------------------
+
+glucose = df["Sensor Reading(mg/dL)"].dropna()
+
+# ---- CV% ----
+mean_glucose = glucose.mean()
+std_glucose = glucose.std()
+cv_percent = (std_glucose / mean_glucose) * 100
+
+# ---- MAGE (classical SD-based excursion method) ----
+def compute_mage(series):
+    s = series.values
+    sd = np.std(s)
+
+    # Identify turning points
+    diffs = np.diff(s)
+    signs = np.sign(diffs)
+    turning_points = []
+
+    for i in range(1, len(signs)):
+        if signs[i] != signs[i-1]:
+            turning_points.append(i)
+
+    excursions = []
+    for i in range(1, len(turning_points)):
+        delta = abs(s[turning_points[i]] - s[turning_points[i-1]])
+        if delta > sd:
+            excursions.append(delta)
+
+    if len(excursions) == 0:
+        return np.nan
+
+    return np.mean(excursions)
+
+mage = compute_mage(glucose)
+
+# ---- CONGA (1-hour standard deviation of lagged differences) ----
+def compute_conga(df, lag_minutes=60):
+    df_temp = df.copy()
+    df_temp = df_temp.set_index("Time")
+
+    lagged = df_temp["Sensor Reading(mg/dL)"].shift(freq=pd.Timedelta(minutes=lag_minutes))
+    diff = df_temp["Sensor Reading(mg/dL)"] - lagged
+    return diff.std()
+
+conga = compute_conga(df, lag_minutes=60)
+
+# ---- LBGI / HBGI (Kovatchev Risk Formula) ----
+def compute_risk_indices(glucose_values):
+    g = glucose_values.values
+
+    # Avoid log problems
+    g = np.clip(g, 1, None)
+
+    f = 1.509 * ((np.log(g) ** 1.084) - 5.381)
+    risk = 10 * (f ** 2)
+
+    lbgi = np.mean(risk[f < 0]) if np.any(f < 0) else 0
+    hbgi = np.mean(risk[f > 0]) if np.any(f > 0) else 0
+
+    return lbgi, hbgi
+
+lbgi, hbgi = compute_risk_indices(glucose)
+
+
 # -------------------------
 # 4) TIR / TAR / TBR
 # -------------------------
@@ -131,16 +199,29 @@ lines1, labels1 = ax1.get_legend_handles_labels()
 lines2, labels2 = ax2.get_legend_handles_labels()
 ax1.legend(lines1 + lines2, labels1 + labels2, loc="upper left")
 
+"""
 # Add TIR/TAR/TBR text box
 textstr = (
     f"TIR ({LOW}-{HIGH}): {tir:.1f}%\n"
     f"TAR (> {HIGH}): {tar:.1f}%\n"
     f"TBR (< {LOW}): {tbr:.1f}%"
 )
+"""
+
+textstr = (
+    f"TIR ({LOW}-{HIGH}): {tir:.1f}%\n"
+    f"TAR (> {HIGH}): {tar:.1f}%\n"
+    f"TBR (< {LOW}): {tbr:.1f}%\n\n"
+    f"CV: {cv_percent:.1f}%\n"
+    f"MAGE: {mage:.1f}\n"
+    f"CONGA(1h): {conga:.1f}\n"
+    f"LBGI: {lbgi:.2f}\n"
+    f"HBGI: {hbgi:.2f}"
+)
+
 
 plt.gcf().text(0.80, 0.75, textstr, fontsize=10,
                bbox=dict(boxstyle="round", alpha=0.2))
-
 
 plt.title("Circadian Glucose Profile with Variability + ROC")
 plt.tight_layout()
