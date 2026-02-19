@@ -1,43 +1,58 @@
 AGP Glucose Analysis Tool with TITR
 
 ## DISCLAIMER ##
-This is a research tool not a diagnostic tool, do not take action based on the data provided here alone.
-Always consult your with medical doctor.
+
+This tool is for research and educational purposes only. It is NOT a medical device and has NOT been validated for clinical diagnosis or treatment decisions.
+
+Do not adjust medications, change diet, or make health decisions based solely on this output. Exercise caution and always consult a qualified healthcare professional for interpretation of glucose data and any treatment adjustments."
 
 ### Overview ###
+
 This tool generates a comprehensive Ambulatory Glucose Profile (AGP) with extended clinical metrics, including Time in Tight Range (TITR) metric. It processes continuous glucose monitoring (CGM) data and produces both a visual AGP plot and detailed statistical analysis.
 
 ### Features ###
 
-Full AGP visualization with percentile curves (5-95%, IQR)
+#### General  ####
 
-Time in Range metrics with level breakdowns:
+- Full AGP visualization with percentile curves (5-95%, IQR)
+- Rate of Change (ROC) profile
+- Circadian binning for time-of-day patterns
+
+#### Time in Range metrics with level breakdowns: ####
+
 - TIR (70-180 mg/dL)
 - TITR (70-140 mg/dL) - Tight target
 - TAR with Level 1 (181-250) and Level 2 (>250)
 - TBR with Level 1 (54-69) and Level 2 (<54)
 
-Advanced variability metrics:
+#### Advanced variability metrics: ####
+
 - MAGE (Mean Amplitude of Glycemic Excursions)
 - MODD (Mean of Daily Differences)
 - CONGA (Continuous Overall Net Glycemic Action)
 
-Risk indices: LBGI, HBGI, ADRR
+#### Risk indices: ####
 
-AUC analysis (total, above range, below range)
+- LBGI (Low Blood Glucose Index)
+- HBGI (High Blood Glucose Index)
+- ADRR (Average Daily Risk Range)
 
-Data quality assessment (wear time, reading frequency)
+### AUC analysis: ####
 
-Rate of Change (ROC) profile
+- total, above range, below range
 
-Circadian binning for time-of-day patterns
+### Data quality assessment: ####
+
+- wear time, reading frequency
 
 ### Requirements ###
 
-Packages
-- pip install -r requirements.txt
+#### Packages ####
 
-Input Data Format
+`pip install -r requirements.txt`
+
+#### Input Data Format ####
+
 - Excel file with two columns:
 - Time: datetime (e.g., "2024-01-01 08:00:00")
 - Sensor Reading(mg/dL): numeric glucose values
@@ -45,6 +60,7 @@ Input Data Format
 ### Usage ###
 
 bash
+
 `python get_sensor.py your_glucose_data.xlsx`
 
 
@@ -54,7 +70,7 @@ bash
 
 ### Metrics Explained ###
 
-Core Metrics
+#### Core Metrics ####
 
 Metric	Description	Clinical Target
 
@@ -65,7 +81,7 @@ Metric	Description	Clinical Target
 - GMI	Glucose Management Indicator	below 7%
 - J-Index	Combined mean + variability	n/a
 
-Variability Metrics
+#### Variability Metrics ####
 
 Metric	Description
 
@@ -73,7 +89,7 @@ Metric	Description
 - MODD	Day-to-day glucose variability
 - CONGA	Intra-day glycemic variability (1h lag)
 
-Risk Metrics
+### Risk Metrics ####
 
 Metric	Description
 
@@ -81,7 +97,7 @@ Metric	Description
 - HBGI	High Blood Glucose Index
 - ADRR	Average Daily Risk Range
 
-Data Quality
+#### Data Quality ####
 
 Metric	Description	Warning Threshold
 
@@ -102,13 +118,10 @@ Key parameters at script top:
 
 ### Limitations & Warnings ###
 
-Minimum data: AGP typically requires ≥5 days for reliability
-
-Data gaps: Long gaps (>2 hours) may affect MODD and ADRR calculations
-
-Sensor accuracy: Assumes CGM-grade data; fingerstick data may have limitations
-
-MAGE calculation: Uses smoothed data; may differ from manual calculation
+- Minimum data: AGP typically requires ≥5 days for reliability
+- Data gaps: Long gaps (>2 hours) may affect MODD and ADRR calculations
+- Sensor accuracy: Assumes CGM-grade data; fingerstick data may have limitations
+- MAGE calculation: Uses smoothed data; may differ from manual calculation
 
 ### Interpretation Tips ###
 
