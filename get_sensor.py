@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 from datetime import timedelta
+from matplotlib.gridspec import GridSpec
 
 LOW = 70
 HIGH = 180
@@ -186,23 +187,30 @@ lbgi, hbgi = compute_risk_indices(glucose)
 # --------------------------------------------------
 total = len(glucose)
 
+# Calculate percentages for each glucose range
+very_low_pct = (glucose < 54).sum() / total * 100
+low_pct = ((glucose >= 54) & (glucose < LOW)).sum() / total * 100
+target_pct = ((glucose >= LOW) & (glucose <= HIGH)).sum() / total * 100
+high_pct = ((glucose > HIGH) & (glucose <= 250)).sum() / total * 100
+very_high_pct = (glucose > 250).sum() / total * 100
+
 # Time in Range (Standard: 70-180)
-tir = ((glucose >= LOW) & (glucose <= HIGH)).sum() / total * 100
+tir = target_pct
 
 # Time in Tight Range (70-140) - NEW METRIC
 titr = ((glucose >= TIGHT_LOW) & (glucose <= TIGHT_HIGH)).sum() / total * 100
 
 # Time Above Range (with levels)
-tar_level1 = ((glucose > HIGH) & (glucose <= 250)).sum() / total * 100  # Level 1: 181-250
-tar_level2 = (glucose > 250).sum() / total * 100  # Level 2: >250
+tar_level1 = high_pct
+tar_level2 = very_high_pct
 tar = tar_level1 + tar_level2
 
 # Time Above Tight Range (140-180) - supplementary
 tatr = ((glucose > TIGHT_HIGH) & (glucose <= HIGH)).sum() / total * 100
 
 # Time Below Range (with levels)
-tbr_level2 = (glucose < 54).sum() / total * 100  # Level 2: <54 (clinically serious)
-tbr_level1 = ((glucose >= 54) & (glucose < LOW)).sum() / total * 100  # Level 1: 54-69
+tbr_level2 = very_low_pct
+tbr_level1 = low_pct
 tbr = tbr_level1 + tbr_level2
 
 # --------------------------------------------------
@@ -219,6 +227,10 @@ values = df_auc["Sensor Reading(mg/dL)"].values
 auc_total = np.trapezoid(values, times)
 auc_high = np.trapezoid(np.maximum(values - HIGH, 0), times)
 auc_low = np.trapezoid(np.maximum(LOW - values, 0), times)
+
+time_weighted_avg = auc_total / times[-1]  # mg/dL (time-weighted average)
+time_in_hyperglycemia_pct = (auc_high / auc_total) * 100 if auc_total > 0 else 0
+time_in_hypoglycemia_pct = (auc_low / auc_total) * 100 if auc_total > 0 else 0
 
 # --------------------------------------------------
 # 11) Data Quality Metrics
@@ -272,9 +284,70 @@ result = result.sort_values("bin")
 result["minutes"] = result["bin"] * BIN_MINUTES
 
 # --------------------------------------------------
-# 13) Plot AGP with Internal Metrics Box and TITR Band
+# 13) Plot AGP with Internal Metrics Box, TITR Band, and Distribution Stacked Bar
 # --------------------------------------------------
-fig, ax1 = plt.subplots(figsize=(16, 9))
+# Create figure with GridSpec for custom layout
+fig = plt.figure(figsize=(18, 9))
+# Create 12 columns with first column width 1 and remaining 11 columns width 1 each (total 12)
+gs = GridSpec(1, 12, figure=fig, width_ratios=[1] + [1]*11, wspace=0.3)
+
+# Left subplot for stacked bar chart (spanning first 2 columns for better visibility)
+ax_bar = fig.add_subplot(gs[0, :2])
+
+# Right subplot for AGP (spanning remaining 10 columns)
+ax1 = fig.add_subplot(gs[0, 2:])
+
+# Create stacked bar chart of glucose distribution
+categories = ['Very Low\n(<54)', 'Low\n(54-69)', 'Target\n(70-180)', 
+              'High\n(181-250)', 'Very High\n(>250)']
+percentages = [very_low_pct, low_pct, target_pct, high_pct, very_high_pct]
+colors = ['darkred', 'red', 'limegreen', 'orange', 'darkorange']
+labels = ['Very Low (<54)', 'Low (54-69)', 'Target (70-180)', 
+          'High (181-250)', 'Very High (>250)']
+
+# Create vertical stacked bar for better visibility
+bottoms = np.zeros(1)
+bars = []
+for i, (pct, color) in enumerate(zip(percentages, colors)):
+    if pct > 0:
+        bar = ax_bar.bar(0, pct, bottom=bottoms[0], color=color, edgecolor='white', 
+                        linewidth=1, width=0.5)
+        bars.append(bar)
+        
+        # Add percentage label if segment is large enough
+        if pct > 3:
+            y_pos = bottoms[0] + pct/2
+            ax_bar.text(0, y_pos, f'{pct:.1f}%', ha='center', va='center', 
+                       color='white', fontweight='bold', fontsize=9)
+        bottoms[0] += pct
+
+# Customize bar chart
+ax_bar.set_ylim(0, 100)
+ax_bar.set_xlim(-0.5, 0.5)
+ax_bar.set_xticks([])
+ax_bar.set_ylabel('Percentage of Time (%)', fontsize=10)
+ax_bar.set_title('Glucose Distribution\nby Range', fontsize=11, pad=10)
+
+# Add gridlines for better readability
+ax_bar.yaxis.grid(True, alpha=0.3, linestyle='--')
+ax_bar.set_axisbelow(True)
+
+# Add legend INSIDE the stacked chart at the bottom
+# Filter to only show categories with >0%
+legend_elements = []
+for i, (label, color, pct) in enumerate(zip(labels, colors, percentages)):
+    if pct > 0:
+        legend_elements.append(plt.Rectangle((0, 0), 1, 1, facecolor=color, edgecolor='white'))
+
+# Position legend at the bottom of the bar chart
+if legend_elements:
+    ax_bar.legend(legend_elements, 
+                 [label for label, pct in zip(labels, percentages) if pct > 0],
+                 loc='lower center', bbox_to_anchor=(0.5, 0.05), 
+                 ncol=1, fontsize=8, frameon=True, fancybox=True, shadow=True,
+                 facecolor='white', edgecolor='gray')
+
+# Now create the main AGP plot on ax1
 x = result["minutes"]
 
 # Add target zones with distinct colors and alpha
@@ -329,12 +402,12 @@ textstr = (
     f"TIR (70-180): {tir:.1f}%\n"
     f"TITR (70-140): {titr:.1f}%  ← Tight Target\n"
     f"TATR (140-180): {tatr:.1f}%\n"
-    f"TAR >180: {tar:.1f}% (>{HIGH}-250: {tar_level1:.1f}%, >250: {tar_level2:.1f}%)\n"
+    f"TAR >180: {tar:.1f}% (181-250: {tar_level1:.1f}%, >250: {tar_level2:.1f}%)\n"
     f"TBR <70: {tbr:.1f}% (54-69: {tbr_level1:.1f}%, <54: {tbr_level2:.1f}%)\n\n"
     f"GLUCOSE STATS\n"
     f"Mean: {mean_glucose:.1f} mg/dL\n"
     f"GMI: {gmi:.2f}%\n"
-    f"CV: {cv_percent:.1f}% {'(Target: <36%)' if cv_percent < 36 else '(Above target)'}\n"
+    f"CV: {cv_percent:.1f}% {'(Stable)' if cv_percent < 36 else '(Unstable)'}\n"
     f"J-Index: {j_index:.1f}\n\n"
     f"VARIABILITY\n"
     f"MAGE: {mage:.1f}\n"
@@ -345,9 +418,9 @@ textstr = (
     f"HBGI: {hbgi:.2f}\n"
     f"ADRR: {adrr:.1f}\n\n"
     f"AUC\n"
-    f"Total: {auc_total:.0f}\n"
-    f">{HIGH}: {auc_high:.0f}\n"
-    f"<{LOW}: {auc_low:.0f}\n\n"
+    f"Time-weighted avg: {time_weighted_avg:.1f} mg/dL\n"
+    f"Hyperglycemia exposure: {time_in_hyperglycemia_pct:.1f}%\n"
+    f"Hypoglycemia exposure: {time_in_hypoglycemia_pct:.1f}%\n\n"
     f"DATA QUALITY\n"
     f"Days: {days_of_data:.1f}\n"
     f"Readings/day: {readings_per_day:.0f}\n"
@@ -366,12 +439,12 @@ plt.gcf().text(0.75, 0.92, textstr, fontsize=9,
 # Adjust legend position to avoid overlapping with metrics box
 lines1, labels1 = ax1.get_legend_handles_labels()
 lines2, labels2 = ax2.get_legend_handles_labels()
-ax1.legend(lines1 + lines2, labels1 + labels2, loc="upper left", fontsize=10, 
-          bbox_to_anchor=(0.02, 0.98))
+ax1.legend(lines1 + lines2, labels1 + labels2, loc="upper left", fontsize=9, 
+          bbox_to_anchor=(0.02, 0.98), ncol=2)
 
-plt.title("Ambulatory Glucose Profile with Time in Tight Range (TITR)", fontsize=14, pad=20)
+plt.suptitle("Ambulatory Glucose Profile with Time in Tight Range (TITR)", fontsize=14, y=0.98)
 plt.tight_layout()
-plt.savefig("agp_profile_with_titr.png", dpi=300, bbox_inches='tight')
+plt.savefig("agp_profile_with_titr_and_distribution.png", dpi=300, bbox_inches='tight')
 plt.show()
 plt.close()
 
@@ -391,3 +464,10 @@ if readings_per_day < 24:
     print(f"Warning: Low reading frequency ({readings_per_day:.0f} readings/day). Continuous glucose monitor expected.")
 if wear_percentage < 70:
     print(f"Warning: Low sensor wear time ({wear_percentage:.1f}%). Results may not be representative.")
+
+print("\nGlucose Distribution Summary:")
+print(f"  Very Low (<54 mg/dL): {very_low_pct:.1f}%")
+print(f"  Low (54-69 mg/dL): {low_pct:.1f}%")
+print(f"  Target (70-180 mg/dL): {target_pct:.1f}%")
+print(f"  High (181-250 mg/dL): {high_pct:.1f}%")
+print(f"  Very High (>250 mg/dL): {very_high_pct:.1f}%")
