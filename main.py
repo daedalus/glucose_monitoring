@@ -53,6 +53,8 @@ parser.add_argument('--doctor', '-d', default='',
                     help='Doctor name for report header')
 parser.add_argument('--notes', '-note', default='', 
                     help='Additional notes for report header')
+parser.add_argument('--heatmap-cmap', default='RdYlGn_r',
+                    help='Colormap for circadian heatmap (default: RdYlGn_r)')
 
 args = parser.parse_args()
 
@@ -470,12 +472,12 @@ df['glucose_range'] = pd.cut(df['Sensor Reading(mg/dL)'],
 # 15) Plot AGP with Internal Metrics Box, TITR Band, and Distribution Stacked Bar (ORIGINAL LAYOUT)
 #     PLUS Raw Data Series at the Bottom
 # --------------------------------------------------
-# Create figure with GridSpec for custom layout - now with 2 rows (original + bottom)
-fig = plt.figure(figsize=(18, 12))
-# Create 12 columns for top row, and full width for bottom row
-gs = GridSpec(2, 12, figure=fig, 
-              height_ratios=[3, 1.5],  # Original AGP:distribution : raw data series
-              hspace=0.3, wspace=0.3)
+# Create figure with GridSpec for custom layout - now with 3 rows (original + bottom + heatmap)
+fig = plt.figure(figsize=(18, 17))
+# Create 12 columns for top row, and full width for bottom rows
+gs = GridSpec(3, 12, figure=fig, 
+              height_ratios=[3, 1.5, 1.5],  # Original AGP:distribution : raw data series : heatmap
+              hspace=0.35, wspace=0.3)
 
 # --- TOP ROW: EXACTLY THE ORIGINAL LAYOUT (unchanged) ---
 # Left subplot for stacked bar chart (spanning first 2 columns)
@@ -736,7 +738,51 @@ ax3.text(0.01, 0.97, f"Overall Trend: {trend_arrow}",
                    edgecolor=trend_color, linewidth=1.5))
 
 
-# Add discrete header with patient information at the top of the figure
+# --- HEATMAP ROW: Circadian Glucose Heatmap (spans all 12 columns) ---
+ax_heat = fig.add_subplot(gs[2, :])
+
+# Build pivot table: rows = calendar dates, columns = hours 0-23
+# Use a separate frame to avoid mutating df
+heat_df = df[['Time', 'Sensor Reading(mg/dL)']].copy()
+heat_df['hour'] = heat_df['Time'].dt.hour
+heat_df['date'] = heat_df['Time'].dt.date
+heat_data = heat_df.pivot_table(index='date', columns='hour',
+                                values='Sensor Reading(mg/dL)', aggfunc='mean')
+# Reindex columns to ensure all 24 hours are present
+heat_data = heat_data.reindex(columns=range(24))
+
+heat_img = ax_heat.imshow(
+    heat_data.values,
+    aspect='auto',
+    cmap=args.heatmap_cmap,
+    vmin=40, vmax=300,
+    interpolation='nearest'
+)
+
+# Colorbar
+cbar = plt.colorbar(heat_img, ax=ax_heat, pad=0.01)
+cbar.set_label('Glucose (mg/dL)', fontsize=10)
+
+# X-axis: hours labelled as HH:00
+ax_heat.set_xticks(range(24))
+ax_heat.set_xticklabels([f'{h:02d}:00' for h in range(24)], fontsize=8, rotation=45, ha='right')
+ax_heat.set_xlabel('Hour of Day', fontsize=10)
+
+# Y-axis: calendar dates
+date_labels = [str(d) for d in heat_data.index]
+ax_heat.set_yticks(range(len(date_labels)))
+ax_heat.set_yticklabels(date_labels, fontsize=8)
+ax_heat.set_ylabel('Date', fontsize=10)
+
+# Reference lines matching the wake (06:00) / sleep (22:00) boundaries used in the AGP chart
+WAKE_HOUR = 6   # matches ax1.axvspan(0, 6*60, ...) above
+SLEEP_HOUR = 22  # matches ax1.axvspan(22*60, 24*60, ...) above
+ax_heat.axvline(x=WAKE_HOUR - 0.5, color='white', linestyle='--', linewidth=1.2, alpha=0.8)
+ax_heat.axvline(x=SLEEP_HOUR - 0.5, color='white', linestyle='--', linewidth=1.2, alpha=0.8)
+
+ax_heat.set_title('Circadian Glucose Heatmap (Mean mg/dL per Hour)', fontsize=12, pad=10)
+
+
 header_text = f"Patient: {report_header['patient_name']} | ID: {report_header['patient_id']}"
 if report_header['doctor']:
     header_text += f" | Dr: {report_header['doctor']}"
@@ -754,7 +800,7 @@ else:
     plt.figtext(0.5, 0.94, f"Source: {report_header['data_source']}", 
                 ha="center", fontsize=8, style='italic', color='gray')
 
-plt.suptitle("Ambulatory Glucose Profile with Time in Tight Range (TITR) and Raw Data Series", 
+plt.suptitle("Ambulatory Glucose Profile with Time in Tight Range (TITR), Raw Data Series and Circadian Heatmap", 
              fontsize=14, y=0.92)
 plt.tight_layout()
 

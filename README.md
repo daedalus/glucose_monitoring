@@ -17,6 +17,7 @@ This tool generates a comprehensive Ambulatory Glucose Profile (AGP) with extend
 - Full AGP visualization with percentile curves (5-95%, IQR)
 - Rate of Change (ROC) profile
 - Circadian binning for time-of-day patterns
+- Circadian glucose heatmap
 
 #### Time in Range metrics with level breakdowns: ####
 
@@ -76,6 +77,7 @@ Options:
   --notes, -note        Additional notes
   --verbose, -v         Print detailed metrics
   --config, -c          Load configuration from JSON file
+  --heatmap-cmap        Colormap for circadian heatmap (default: RdYlGn_r)
 ```
 
 #### Examples ####
