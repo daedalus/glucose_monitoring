@@ -514,14 +514,14 @@ target_data = df[df['glucose_range'] == 'Target']
 if not target_data.empty:
     ax3.scatter(target_data['Time'], target_data['Sensor Reading(mg/dL)'], 
                c=range_colors['Target'], s=8, alpha=0.4, 
-               label=f'Target (70-180): {len(target_data)} pts', edgecolors='none')
+               label=f'Target (70-140): {len(target_data)} pts', edgecolors='none')
 
 # Plot high and very high
 high_data = df[df['glucose_range'] == 'High']
 if not high_data.empty:
     ax3.scatter(high_data['Time'], high_data['Sensor Reading(mg/dL)'], 
                c=range_colors['High'], s=12, alpha=0.6, 
-               label=f'High (181-250): {len(high_data)} pts', edgecolors='none')
+               label=f'High (141-250): {len(high_data)} pts', edgecolors='none')
 
 very_high_data = df[df['glucose_range'] == 'Very High']
 if not very_high_data.empty:
