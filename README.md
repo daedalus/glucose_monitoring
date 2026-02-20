@@ -135,51 +135,97 @@ Key parameters at script top:
 
 ### References ###
 
-#### Ambulatory Glucose Profile (AGP) ####
+# Continuous Glucose Monitoring (CGM) Metrics – Verified References
 
-1. **Mazze RS, Strock E, Wesley DM, et al.** (1987). Characterizing diabetes control with 'The ambulatory glucose profile'. *Journal of Diabetes and its Complications*, 1(2):260-267. [PubMed](https://pubmed.ncbi.nlm.nih.gov/3333689/)
+#### Ambulatory Glucose Profile (AGP) ###
 
-2. **Battelino T, Danne T, Bergenstal RM, et al.** (2019). Clinical Targets for Continuous Glucose Monitoring Data Interpretation: Recommendations From the International Consensus on Time in Range. *Diabetes Care*, 42(8):1593-1603. [doi:10.2337/dci19-0028](https://diabetesjournals.org/care/article/42/8/1593/36345/Clinical-Targets-for-Continuous-Glucose)
+1. Mazze RS, Lucido D, Langer O, Hartmann K, Rodbard D.  
+   *Ambulatory glucose profile: representation of verified self-monitored blood glucose data.*  
+   **Diabetes Care.** 1987;10(1):111–117.  
+   DOI: 10.2337/diacare.10.1.111
 
-#### Time in Range Metrics (TIR, TBR, TAR, TITR) ####
+2. Mazze RS, Strock E, Wesley D, Borgman S, Morgan B, Bergenstal R, Cuddihy R.  
+   *Characterizing glucose exposure for individuals with normal glucose tolerance using continuous glucose monitoring and ambulatory glucose profile analysis.*  
+   **Diabetes Technology & Therapeutics.** 2008;10(3):149–159.  
+   DOI: 10.1089/dia.2007.0293
 
-3. **Battelino T, et al.** (2019). Clinical Targets for Continuous Glucose Monitoring Data Interpretation: Recommendations From the International Consensus on Time in Range. *Diabetes Care*, 42(8):1593-1603. [Link](https://diabetesjournals.org/care/article/42/8/1593/36345/Clinical-Targets-for-Continuous-Glucose)
+3. Battelino T, Danne T, Bergenstal RM, et al.  
+   *Clinical Targets for Continuous Glucose Monitoring Data Interpretation: Recommendations From the International Consensus on Time in Range.*  
+   **Diabetes Care.** 2019;42(8):1593–1603.  
+   DOI: 10.2337/dci19-0028
+
+
+#### Time in Range (TIR, TBR, TAR) ####
+
+4. Battelino T, Danne T, Bergenstal RM, et al.  
+   *Clinical Targets for Continuous Glucose Monitoring Data Interpretation: Recommendations From the International Consensus on Time in Range.*  
+   **Diabetes Care.** 2019;42(8):1593–1603.  
+   DOI: 10.2337/dci19-0028
+
 
 #### Coefficient of Variation (CV) ####
 
-4. **Monnier L, et al.** (2008). Glycemic Variability: Should We and Can We Prevent It? *Diabetes Care*, 31 Suppl 2:S150-4. [Link](https://diabetesjournals.org/care/article/31/Supplement_2/S150/25288)
+5. Monnier L, Colette C, Wojtusciszyn A, et al.  
+   *Glycemic variability: should we and can we prevent it?*  
+   **Diabetes Care.** 2008;31(Suppl 2):S150–S154.  
+   DOI: 10.2337/dc08-s241
+
 
 #### Glucose Management Indicator (GMI) ####
 
-5. **Bergenstal RM, et al.** (2018). Glucose Management Indicator (GMI): A New Term for Estimating A1C From Continuous Glucose Monitoring. *Diabetes Care*, 41(11):2275-2280. [Link](https://diabetesjournals.org/care/article/41/11/2275/36534)
+6. Bergenstal RM, Beck RW, Close KL, et al.  
+   *Glucose Management Indicator (GMI): A New Term for Estimating A1C From Continuous Glucose Monitoring.*  
+   **Diabetes Care.** 2018;41(11):2275–2280.  
+   DOI: 10.2337/dc18-0734
+
 
 #### J-Index ####
 
-6. **Wojcicki JM.** (1995). J-Index. A new proposition of the assessment of current glucose control in diabetic patients. *Hormone and Metabolic Research*, 27(1):41-42. [PubMed](https://pubmed.ncbi.nlm.nih.gov/7710282/)
+7. Wojcicki JM.  
+   *J-Index: a new proposition of the assessment of current glucose control in diabetic patients.*  
+   **Hormone and Metabolic Research.** 1995;27(1):41–42.  
+   DOI: 10.1055/s-2007-979927
+
 
 #### MAGE (Mean Amplitude of Glycemic Excursions) ####
 
-7. **Service FJ, Molnar GD, Rosevear JW, Ackerman E, Gatewood LC, Taylor WF.** (1970). Mean amplitude of glycemic excursions, a measure of diabetic instability. *Diabetes*, 19(9):644-655. [PubMed](https://pubmed.ncbi.nlm.nih.gov/5476146/)
+8. Service FJ, Molnar GD, Rosevear JW, Ackerman E, Gatewood LC, Taylor WF.  
+   *Mean amplitude of glycemic excursions, a measure of diabetic instability.*  
+   **Diabetes.** 1970;19(9):644–655.  
+   DOI: 10.2337/diab.19.9.644
+
 
 #### MODD (Mean of Daily Differences) ####
 
-8. **Molnar GD, Taylor WF, Ho MM.** (1970). Day-to-day variation of continuously monitored glycaemia: a further measure of diabetic instability. *Diabetologia*, 6(4):342-347. [Link](https://link.springer.com/article/10.1007/BF01228243)
+9. Molnar GD, Taylor WF, Ho MM.  
+   *Day-to-day variation of continuously monitored glycaemia: a further measure of diabetic instability.*  
+   **Diabetologia.** 1972;8(5):342–348.  
+   DOI: 10.1007/BF01218495
+
 
 #### CONGA (Continuous Overall Net Glycemic Action) ####
 
-9. **McDonnell CM, Donath SM, Vidmar SI, Werther GA, Cameron FJ.** (2005). A novel approach to continuous glucose analysis utilizing glycemic variation. *Diabetes Technology & Therapeutics*, 7(2):253-263. [PubMed](https://pubmed.ncbi.nlm.nih.gov/15738710/)
+10. McDonnell CM, Donath SM, Vidmar SI, Werther GA, Cameron FJ.  
+    *A novel approach to continuous glucose analysis utilizing glycemic variation.*  
+    **Diabetes Technology & Therapeutics.** 2005;7(2):253–263.  
+    DOI: 10.1089/dia.2005.7.253
+
 
 #### LBGI & HBGI (Low/High Blood Glucose Index) ####
 
-10. **Kovatchev BP, et al.** (2001). Assessment of risk for severe hypoglycemia among patients with type 1 and type 2 diabetes using self-monitoring blood glucose data. *Diabetes Care*, 24(11):1870-1875. [Link](https://diabetesjournals.org/care/article/24/11/1870/22463/Assessment-of-Risk-for-Severe-Hypoglycemia-Among)
+11. Kovatchev BP, Cox DJ, Gonder-Frederick LA, Clarke WL.  
+    *Assessment of risk for severe hypoglycemia among patients with type 1 and type 2 diabetes using self-monitoring blood glucose data.*  
+    **Diabetes Care.** 2001;24(11):1870–1875.  
+    DOI: 10.2337/diacare.24.11.1870
+
 
 #### ADRR (Average Daily Risk Range) ####
 
-11. **Kovatchev BP, et al.** (2006). The average daily risk range: a new measure of glycemic variability. *Diabetes Care*, 29(11):2272-2277. [Link](https://diabetesjournals.org/care/article/29/11/2272/24793/The-Average-Daily-Risk-Range-a-New-Measure-of)
+12. Kovatchev BP, Otto E, Cox D, et al.  
+    *The average daily risk range: a new measure of glycemic variability.*  
+    **Diabetes Care.** 2006;29(11):2272–2277.  
+    DOI: 10.2337/dc06-1085
 
-#### GRI (Glycemia Risk Index) ####
-
-12. **Hill NR, et al.** (2011). A novel approach to assessing glycemic variability in type 1 diabetes: the glycemic risk index. *Diabetes Technology & Therapeutics*, 13(8):835-841. [Link](https://www.liebertpub.com/doi/10.1089/dia.2011.0041)
 
 ### License ###
 
