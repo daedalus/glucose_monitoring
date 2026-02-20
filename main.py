@@ -372,11 +372,14 @@ values = df_auc["Sensor Reading(mg/dL)"].values
 
 auc_total = trapz(values, times)
 auc_high = trapz(np.maximum(values - HIGH, 0), times)
-auc_low = trapz(np.maximum(VERY_LOW - values, 0), times)
+auc_low = trapz(np.maximum(LOW - values, 0), times)
+auc_very_low = trapz(np.maximum(VERY_LOW - values, 0), times)
 
 time_weighted_avg = auc_total / times[-1] if times[-1] > 0 else np.nan
-time_in_hyperglycemia_pct = (auc_high / auc_total) * 100 if auc_total > 0 else 0
-time_in_hypoglycemia_pct = (auc_low / auc_total) * 100 if auc_total > 0 else 0
+exposure_severity_to_hyperglycemia_pct = (auc_high / auc_total) * 100 if auc_total > 0 else 0
+exposure_severity_to_hypoglycemia_pct = (auc_low / auc_total) * 100 if auc_total > 0 else 0
+exposure_severity_to_severe_hypoglycemia_pct = (auc_very_low / auc_total) * 100 if auc_total > 0 else 0
+
 
 # --------------------------------------------------
 # 11) Data Quality Metrics
@@ -611,8 +614,9 @@ textstr = (
     f"ADRR: {fmt(adrr)}\n\n"
     f"AUC\n"
     f"Time-weighted avg: {fmt(time_weighted_avg)} mg/dL\n"
-    f"Hyperglycemia exposure: {time_in_hyperglycemia_pct:.1f}%\n"
-    f"Hypoglycemia exposure: {time_in_hypoglycemia_pct:.1f}%\n\n"
+    f"Hyperglycemia exposure severity: {exposure_severity_to_hyperglycemia_pct:.1f}%\n"
+    f"Hypoglycemia exposure severiry: {exposure_severity_to_hypoglycemia_pct:.1f}%\n"
+    f"Severe hypoglycemia exposure severiry: {exposure_severity_to_severe_hypoglycemia_pct:.1f}%\n\n"
     f"DATA QUALITY\n"
     f"Days: {days_of_data:.1f}\n"
     f"Readings/day: {readings_per_day:.0f}\n"
@@ -850,8 +854,8 @@ if args.export:
         'gri': round(gri, 1),
         'adrr': round(adrr, 1) if not np.isnan(adrr) else None,
         'auc_time_weighted_avg': round(time_weighted_avg, 1),
-        'auc_hyperglycemia_pct': round(time_in_hyperglycemia_pct, 1),
-        'auc_hypoglycemia_pct': round(time_in_hypoglycemia_pct, 1),
+        'auc_hyperglycemia_pct': round(exposure_severity_to_hyperglycemia_pct, 1),
+        'auc_hypoglycemia_pct': round(exposure_severity_to_hypoglycemia_pct, 1),
         'trend_direction': trend_direction,
         'trend_slope_mg_per_day': round(trend_slope, 2),
         'severe_hypo_per_week': round(severe_hypo_per_week, 2) if not np.isnan(severe_hypo_per_week) else None,
