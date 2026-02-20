@@ -190,9 +190,9 @@ total = len(glucose)
 
 # Calculate percentages for each glucose range
 very_low_pct = (glucose < 54).sum() / total * 100
-low_pct = ((glucose >= 54) & (glucose < TIGHT_LOW)).sum() / total * 100
-target_pct = ((glucose >= TIGHT_LOW) & (glucose <= TIGHT_HIGH)).sum() / total * 100
-high_pct = ((glucose > TIGHT_HIGH) & (glucose <= 250)).sum() / total * 100
+low_pct = ((glucose >= 54) & (glucose < LOW)).sum() / total * 100
+target_pct = ((glucose >= LOW) & (glucose <= HIGH)).sum() / total * 100
+high_pct = ((glucose > HIGH) & (glucose <= 250)).sum() / total * 100
 very_high_pct = (glucose > 250).sum() / total * 100
 
 # Time in Range (Standard: 70-180)
@@ -200,6 +200,8 @@ tir = target_pct
 
 # Time in Tight Range (70-140) - NEW METRIC
 titr = ((glucose >= TIGHT_LOW) & (glucose <= TIGHT_HIGH)).sum() / total * 100
+tight_target_pct = titr
+
 
 # Time Above Range (with levels)
 tar_level1 = high_pct
@@ -335,7 +337,7 @@ ax1 = fig.add_subplot(gs[0, 2:])
 # Create stacked bar chart of glucose distribution (EXACTLY AS ORIGINAL)
 categories = ['Very Low\n(<54)', 'Low\n(54-69)', 'Target\n(70-180)', 
               'High\n(181-250)', 'Very High\n(>250)']
-percentages = [very_low_pct, low_pct, target_pct, high_pct, very_high_pct]
+percentages = [very_low_pct, low_pct, tight_target_pct, high_pct, very_high_pct]
 colors = ['darkred', 'red', 'limegreen', 'orange', 'darkorange']
 labels = ['Very Low (<54)', 'Low (54-69)', 'Target (70-180)', 
           'High (181-250)', 'Very High (>250)']
