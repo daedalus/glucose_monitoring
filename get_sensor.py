@@ -183,6 +183,14 @@ def compute_risk_indices(values):
 
 lbgi, hbgi = compute_risk_indices(glucose)
 
+
+def compute_gri(lbgi, hbgi):
+    # GRI = (3.0 * LBGI) + (1.6 * HBGI)
+    return (3.0 * lbgi) + (1.6 * hbgi)
+
+
+gri = compute_gri(lbgi, hbgi)
+
 # --------------------------------------------------
 # 9) TIR / TAR / TBR / TITR with levels
 # --------------------------------------------------
@@ -453,6 +461,7 @@ textstr = (
     f"RISK\n"
     f"LBGI: {lbgi:.2f}\n"
     f"HBGI: {hbgi:.2f}\n"
+    f"GRI: {gri:.1f}\n"
     f"ADRR: {adrr:.1f}\n\n"
     f"AUC\n"
     f"Time-weighted avg: {time_weighted_avg:.1f} mg/dL\n"

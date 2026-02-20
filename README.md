@@ -95,6 +95,7 @@ Metric	Description
 
 - LBGI	Low Blood Glucose Index
 - HBGI	High Blood Glucose Index
+- GRI   Glycemia risk index
 - ADRR	Average Daily Risk Range
 
 #### Data Quality ####
