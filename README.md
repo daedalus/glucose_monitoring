@@ -131,3 +131,7 @@ Key parameters at script top:
 - Nighttime patterns: Shaded area helps identify nocturnal hypoglycemia; however, a sharp "V-shaped" drop with a rapid recovery may indicate sensor compression artifact rather than true hypoglycemia
 - ROC spikes indicate rapid changes; correlate with meals/exercise
 - GMI < 7.0%: Suggests acceptable glycemic control (Note: GMI estimates A1c from CGM data, but may differ from lab A1c).
+
+### License ###
+
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
