@@ -1,4 +1,4 @@
-Ambulatory glucose profile analysis tool
+# Ambulatory glucose profile analysis tool
 
 ## DISCLAIMER ##
 
@@ -95,7 +95,7 @@ Metric	Description
 
 - LBGI	Low Blood Glucose Index
 - HBGI	High Blood Glucose Index
-- GRI   Glycemia risk index
+- GRI	Glycemia risk index
 - ADRR	Average Daily Risk Range
 
 #### Data Quality ####
@@ -110,12 +110,12 @@ Metric	Description	Warning Threshold
 
 Key parameters at script top:
 
-- LOW = 70           # Lower bound standard range
-- HIGH = 180         # Upper bound standard range
-- TIGHT_LOW = 70     # Lower bound tight range
-- TIGHT_HIGH = 140   # Upper bound tight range
-- BIN_MINUTES = 5    # Time bin size for AGP
-- ROC_CLIP = 10      # Rate of change physiological limit
+- LOW = 70			# Lower bound standard range
+- HIGH = 180			# Upper bound standard range
+- TIGHT_LOW = 70		# Lower bound tight range
+- TIGHT_HIGH = 140		# Upper bound tight range
+- BIN_MINUTES = 5		# Time bin size for AGP
+- ROC_CLIP = 10		# Rate of change physiological limit
 
 ### Limitations & Warnings ###
 
@@ -132,6 +132,54 @@ Key parameters at script top:
 - Nighttime patterns: Shaded area helps identify nocturnal hypoglycemia; however, a sharp "V-shaped" drop with a rapid recovery may indicate sensor compression artifact rather than true hypoglycemia
 - ROC spikes indicate rapid changes; correlate with meals/exercise
 - GMI < 7.0%: Suggests acceptable glycemic control (Note: GMI estimates A1c from CGM data, but may differ from lab A1c).
+
+### References ###
+
+#### Ambulatory Glucose Profile (AGP) ####
+
+1. **Mazze RS, Strock E, Wesley DM, et al.** (1987). Characterizing diabetes control with 'The ambulatory glucose profile'. *Journal of Diabetes and its Complications*, 1(2):260-267. [PubMed](https://pubmed.ncbi.nlm.nih.gov/3333689/)
+
+2. **Battelino T, Danne T, Bergenstal RM, et al.** (2019). Clinical Targets for Continuous Glucose Monitoring Data Interpretation: Recommendations From the International Consensus on Time in Range. *Diabetes Care*, 42(8):1593-1603. [doi:10.2337/dci19-0028](https://diabetesjournals.org/care/article/42/8/1593/36345/Clinical-Targets-for-Continuous-Glucose)
+
+#### Time in Range Metrics (TIR, TBR, TAR, TITR) ####
+
+3. **Battelino T, et al.** (2019). Clinical Targets for Continuous Glucose Monitoring Data Interpretation: Recommendations From the International Consensus on Time in Range. *Diabetes Care*, 42(8):1593-1603. [Link](https://diabetesjournals.org/care/article/42/8/1593/36345/Clinical-Targets-for-Continuous-Glucose)
+
+#### Coefficient of Variation (CV) ####
+
+4. **Monnier L, et al.** (2008). Glycemic Variability: Should We and Can We Prevent It? *Diabetes Care*, 31 Suppl 2:S150-4. [Link](https://diabetesjournals.org/care/article/31/Supplement_2/S150/25288)
+
+#### Glucose Management Indicator (GMI) ####
+
+5. **Bergenstal RM, et al.** (2018). Glucose Management Indicator (GMI): A New Term for Estimating A1C From Continuous Glucose Monitoring. *Diabetes Care*, 41(11):2275-2280. [Link](https://diabetesjournals.org/care/article/41/11/2275/36534)
+
+#### J-Index ####
+
+6. **Wojcicki JM.** (1995). J-Index. A new proposition of the assessment of current glucose control in diabetic patients. *Hormone and Metabolic Research*, 27(1):41-42. [PubMed](https://pubmed.ncbi.nlm.nih.gov/7710282/)
+
+#### MAGE (Mean Amplitude of Glycemic Excursions) ####
+
+7. **Service FJ, Molnar GD, Rosevear JW, Ackerman E, Gatewood LC, Taylor WF.** (1970). Mean amplitude of glycemic excursions, a measure of diabetic instability. *Diabetes*, 19(9):644-655. [PubMed](https://pubmed.ncbi.nlm.nih.gov/5476146/)
+
+#### MODD (Mean of Daily Differences) ####
+
+8. **Molnar GD, Taylor WF, Ho MM.** (1970). Day-to-day variation of continuously monitored glycaemia: a further measure of diabetic instability. *Diabetologia*, 6(4):342-347. [Link](https://link.springer.com/article/10.1007/BF01228243)
+
+#### CONGA (Continuous Overall Net Glycemic Action) ####
+
+9. **McDonnell CM, Donath SM, Vidmar SI, Werther GA, Cameron FJ.** (2005). A novel approach to continuous glucose analysis utilizing glycemic variation. *Diabetes Technology & Therapeutics*, 7(2):253-263. [PubMed](https://pubmed.ncbi.nlm.nih.gov/15738710/)
+
+#### LBGI & HBGI (Low/High Blood Glucose Index) ####
+
+10. **Kovatchev BP, et al.** (2001). Assessment of risk for severe hypoglycemia among patients with type 1 and type 2 diabetes using self-monitoring blood glucose data. *Diabetes Care*, 24(11):1870-1875. [Link](https://diabetesjournals.org/care/article/24/11/1870/22463/Assessment-of-Risk-for-Severe-Hypoglycemia-Among)
+
+#### ADRR (Average Daily Risk Range) ####
+
+11. **Kovatchev BP, et al.** (2006). The average daily risk range: a new measure of glycemic variability. *Diabetes Care*, 29(11):2272-2277. [Link](https://diabetesjournals.org/care/article/29/11/2272/24793/The-Average-Daily-Risk-Range-a-New-Measure-of)
+
+#### GRI (Glycemia Risk Index) ####
+
+12. **Hill NR, et al.** (2011). A novel approach to assessing glycemic variability in type 1 diabetes: the glycemic risk index. *Diabetes Technology & Therapeutics*, 13(8):835-841. [Link](https://www.liebertpub.com/doi/10.1089/dia.2011.0041)
 
 ### License ###
 
