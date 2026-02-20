@@ -249,7 +249,29 @@ severe_hypo_count = (glucose < 40).sum()
 severe_hypo_per_week = (severe_hypo_count / days_of_data) * 7 if days_of_data > 0 else np.nan
 
 # --------------------------------------------------
-# 12) Circadian Binning
+# 12) Overall Glucose Trend
+# --------------------------------------------------
+time_days = (df['Time'] - df['Time'].min()).dt.total_seconds() / 86400.0
+trend_slope, _ = np.polyfit(time_days, df['Sensor Reading(mg/dL)'], 1)
+
+# Thresholds: ±1 mg/dL/day represents clinically meaningful directional change
+# while minimizing noise from short-term fluctuations
+
+if trend_slope > 1:
+    trend_direction = 'UP'
+    trend_arrow = '↑'
+    trend_color = 'orangered'
+elif trend_slope < -1:
+    trend_direction = 'DOWN'
+    trend_arrow = '↓'
+    trend_color = 'mediumseagreen'
+else:
+    trend_direction = 'STABLE'
+    trend_arrow = '→'
+    trend_color = 'steelblue'
+
+# --------------------------------------------------
+# 13) Circadian Binning
 # --------------------------------------------------
 df["seconds"] = (
     df["Time"].dt.hour * 3600 +
@@ -285,7 +307,7 @@ result = result.sort_values("bin")
 result["minutes"] = result["bin"] * BIN_MINUTES
 
 # --------------------------------------------------
-# 13) Create color-coded data series for raw readings
+# 14) Create color-coded data series for raw readings
 # --------------------------------------------------
 # Create a categorical column for glucose ranges
 df['glucose_range'] = pd.cut(df['Sensor Reading(mg/dL)'], 
@@ -293,7 +315,7 @@ df['glucose_range'] = pd.cut(df['Sensor Reading(mg/dL)'],
                               labels=['Very Low', 'Low', 'Target', 'High', 'Very High'])
 
 # --------------------------------------------------
-# 14) Plot AGP with Internal Metrics Box, TITR Band, and Distribution Stacked Bar (ORIGINAL LAYOUT)
+# 15) Plot AGP with Internal Metrics Box, TITR Band, and Distribution Stacked Bar (ORIGINAL LAYOUT)
 #     PLUS Raw Data Series at the Bottom
 # --------------------------------------------------
 # Create figure with GridSpec for custom layout - now with 2 rows (original + bottom)
@@ -455,6 +477,13 @@ lines2, labels2 = ax2.get_legend_handles_labels()
 ax1.legend(lines1 + lines2, labels1 + labels2, loc="upper left", fontsize=9, 
           bbox_to_anchor=(0.02, 0.98), ncol=2)
 
+# Trend annotation on AGP chart (positioned between legend and metrics box)
+ax1.text(0.60, 0.97, f"Overall Trend: {trend_arrow}",
+         transform=ax1.transAxes, fontsize=12, fontweight='bold',
+         color=trend_color, va='top', ha='center',
+         bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.7,
+                   edgecolor=trend_color, linewidth=1.5))
+
 # --- BOTTOM ROW: Raw Data Series Chart (spans all 12 columns) ---
 ax3 = fig.add_subplot(gs[1, :])
 
@@ -531,6 +560,13 @@ ax3.legend(loc='upper right', ncol=3, fontsize=8, framealpha=0.9)
 # Set y-axis limits for consistency
 ax3.set_ylim(20, 400)
 
+# Trend annotation on raw data series chart (upper-left, clear of upper-right legend)
+ax3.text(0.01, 0.97, f"Overall Trend: {trend_arrow}",
+         transform=ax3.transAxes, fontsize=11, fontweight='bold',
+         color=trend_color, va='top', ha='left',
+         bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.7,
+                   edgecolor=trend_color, linewidth=1.5))
+
 plt.suptitle("Ambulatory Glucose Profile with Time in Tight Range (TITR) and Raw Data Series", 
              fontsize=14, y=0.98)
 plt.tight_layout()
@@ -546,6 +582,7 @@ print(f"Time in Range (70-180): {tir:.1f}% - {'Target met (≥70%)' if tir >= 70
 print(f"Time in Tight Range (70-140): {titr:.1f}% - {'Excellent' if titr >= 50 else 'Room for improvement'}")
 print(f"Time Below Range: {tbr:.1f}% - {'Target met (<4%)' if tbr < 4 else 'Above target'}")
 print(f"Glucose Variability (CV): {cv_percent:.1f}% - {'Stable (<36%)' if cv_percent < 36 else 'Unstable (≥36%)'}")
+print(f"Overall Trend: {trend_arrow} {trend_direction} (slope: {trend_slope:.1f} mg/dL/day)")
 print("="*60)
 
 if days_of_data < 5:
