@@ -59,10 +59,50 @@ This tool generates a comprehensive Ambulatory Glucose Profile (AGP) with extend
 
 ### Usage ###
 
-bash
+```
+python get_sensor.py input_file.xlsx [options]
 
-`python get_sensor.py your_glucose_data.xlsx`
+Options:
+  --output, -o           Output PNG filename
+  --low-threshold        Low glucose threshold (default: 70)
+  --high-threshold       High glucose threshold (default: 180)
+  --tight-low           Tight range lower limit (default: 70)
+  --tight-high          Tight range upper limit (default: 140)
+  --bin-minutes         Time bin size for AGP (default: 5)
+  --min-samples         Minimum samples per bin (default: 5)
+  --patient-name, -n    Patient name
+  --patient-id, -id     Patient ID
+  --doctor, -d          Doctor name
+  --notes, -note        Additional notes
+  --verbose, -v         Print detailed metrics
+  --config, -c          Load configuration from JSON file
+```
 
+#### Examples ####
+
+Basic usage
+
+`python get_sensor.py data.xlsx`
+
+Custom output file and thresholds
+
+`python get_sensor.py data.xlsx -o my_agp.png --low-threshold 65 --high-threshold 200`
+
+Custom tight range and bin size
+
+`python get_sensor.py data.xlsx --tight-low 80 --tight-high 150 --bin-minutes 10`
+
+Calculate only metrics, no plot
+
+`python get_sensor.py data.xlsx --no-plot --verbose`
+
+With config file
+
+`python get_sensor.py data.xlsx --config my_settings.json`
+
+See all options
+
+`python get_sensor.py -h`
 
 ## Example ##
 
