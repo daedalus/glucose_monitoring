@@ -18,7 +18,7 @@ def main():
         generate_agp_plot(df, result, metrics, cfg, args, report_header)
     elif args.verbose:
         print("Plot generation skipped (--no-plot flag used)")
-    print_clinical_summary(metrics, report_header)
+    print_clinical_summary(metrics, report_header, cfg)
     if args.export:
         export_metrics(metrics, args.export, report_header=report_header, verbose=args.verbose)
 
