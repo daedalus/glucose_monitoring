@@ -51,8 +51,10 @@ def build_parser():
                         help='Doctor name for report header')
     parser.add_argument('--notes', '-note', default='',
                         help='Additional notes for report header')
+    parser.add_argument('--heatmap', action='store_true',
+                        help='Enable the circadian glucose heatmap (disabled by default)')
     parser.add_argument('--heatmap-cmap', default='RdYlGn_r',
-                        help='Colormap for circadian heatmap (default: RdYlGn_r)')
+                        help='Colormap for circadian heatmap (default: RdYlGn_r, requires --heatmap)')
 
     return parser
 
