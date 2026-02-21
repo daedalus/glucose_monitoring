@@ -52,16 +52,29 @@ This tool generates a comprehensive Ambulatory Glucose Profile (AGP) with extend
 
 `pip install -r requirements.txt`
 
+Dependencies include `pandas`, `numpy`, `matplotlib`, `openpyxl` (xlsx), `xlrd` (xls), and `odfpy` (ods).
+
 #### Input Data Format ####
 
-- Excel file with two columns:
-- Time: datetime (e.g., "2024-01-01 08:00:00")
-- Sensor Reading(mg/dL): numeric glucose values
+Supported file formats:
+
+| Extension | Format |
+|-----------|--------|
+| `.xlsx` | Excel 2007+ |
+| `.xls` | Excel 97-2003 |
+| `.csv` | Comma-separated values |
+| `.ods` | OpenDocument Spreadsheet |
+
+Required columns:
+- **Time**: datetime (e.g., "2024-01-01 08:00:00")
+- **Sensor Reading(mg/dL)**: numeric glucose values
 
 ### Usage ###
 
 ```
-python main.py input_file.xlsx [options]
+python main.py input_file [options]
+
+Supported input formats: .xlsx, .xls, .csv, .ods
 
 Options:
   --output, -o           Output PNG filename
@@ -85,6 +98,12 @@ Options:
 Basic usage
 
 `python main.py data.xlsx`
+
+Or with CSV/ODS input
+
+`python main.py data.csv`
+
+`python main.py data.ods`
 
 Custom output file and thresholds
 

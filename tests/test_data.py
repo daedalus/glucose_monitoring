@@ -9,6 +9,14 @@ def _write_excel(path, df):
     df.to_excel(path, index=False)
 
 
+def _write_csv(path, df):
+    df.to_csv(path, index=False)
+
+
+def _write_ods(path, df):
+    df.to_excel(path, index=False, engine="odf")
+
+
 def _valid_df(n=300):
     """Return a minimal valid glucose DataFrame with n rows."""
     rng = pd.date_range("2024-01-01", periods=n, freq="5min")
@@ -71,3 +79,30 @@ def test_load_computes_roc_clipped(tmp_path, cfg):
     roc = result["ROC"].dropna()
     assert (roc.abs() <= cfg["ROC_CLIP"]).all()
     assert roc.apply(np.isfinite).all()
+
+
+def test_load_csv_returns_expected_columns(tmp_path, cfg):
+    path = str(tmp_path / "glucose.csv")
+    _write_csv(path, _valid_df())
+    df = load_and_preprocess(path, cfg)
+    assert "Time" in df.columns
+    assert "Sensor Reading(mg/dL)" in df.columns
+    assert "ROC" in df.columns
+
+
+def test_load_ods_returns_expected_columns(tmp_path, cfg):
+    path = str(tmp_path / "glucose.ods")
+    _write_ods(path, _valid_df())
+    df = load_and_preprocess(path, cfg)
+    assert "Time" in df.columns
+    assert "Sensor Reading(mg/dL)" in df.columns
+    assert "ROC" in df.columns
+
+
+def test_unsupported_extension_raises_value_error(tmp_path, cfg):
+    path = str(tmp_path / "glucose.txt")
+    # Create a dummy file so the extension dispatch is reached
+    path_obj = tmp_path / "glucose.txt"
+    path_obj.write_text("dummy")
+    with pytest.raises(ValueError, match="Unsupported file format"):
+        load_and_preprocess(str(path_obj), cfg)

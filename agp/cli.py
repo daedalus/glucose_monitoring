@@ -11,7 +11,7 @@ except PackageNotFoundError:
 def build_parser():
     """Construct and return the ArgumentParser for the AGP tool."""
     parser = argparse.ArgumentParser(description='Generate Ambulatory Glucose Profile from sensor data')
-    parser.add_argument('input_file', help='Path to Excel file with glucose data')
+    parser.add_argument('input_file', help='Path to glucose data file (.xlsx, .xls, .csv, .ods)')
     parser.add_argument('--output', '-o', default='ambulatory_glucose_profile.png',
                         help='Output PNG filename (default: ambulatory_glucose_profile.png)')
 

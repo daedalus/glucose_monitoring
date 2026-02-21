@@ -1,10 +1,30 @@
+import os
 import sys
 import pandas as pd
 import numpy as np
 
+_READERS = {
+    ".xlsx": lambda p: pd.read_excel(p, engine="openpyxl"),
+    ".xls":  lambda p: pd.read_excel(p, engine="xlrd"),
+    ".ods":  lambda p: pd.read_excel(p, engine="odf"),
+    ".csv":  lambda p: pd.read_csv(p),
+}
+
+
+def _read_input(input_file: str) -> pd.DataFrame:
+    """Dispatch to the correct pandas reader based on file extension."""
+    ext = os.path.splitext(input_file)[1].lower()
+    reader = _READERS.get(ext)
+    if reader is None:
+        supported = ", ".join(sorted(_READERS))
+        raise ValueError(
+            f"Unsupported file format '{ext}'. Supported formats: {supported}"
+        )
+    return reader(input_file)
+
 
 def load_and_preprocess(input_file, cfg, verbose=False):
-    """Load Excel file, validate columns, parse datetimes, deduplicate, compute ROC.
+    """Load data file (xlsx/xls/csv/ods), validate columns, parse datetimes, deduplicate, compute ROC.
 
     Returns a cleaned DataFrame with an added 'ROC' column.
     """
@@ -14,9 +34,11 @@ def load_and_preprocess(input_file, cfg, verbose=False):
               f"Tight={cfg['TIGHT_LOW']}-{cfg['TIGHT_HIGH']}")
 
     try:
-        df = pd.read_excel(input_file)
+        df = _read_input(input_file)
         if verbose:
             print(f"Successfully loaded {len(df)} rows from {input_file}")
+    except ValueError:
+        raise
     except Exception as e:
         print(f"Error loading file {input_file}: {e}")
         sys.exit(1)
