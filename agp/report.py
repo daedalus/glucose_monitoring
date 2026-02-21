@@ -15,8 +15,14 @@ def create_report_header(args):
     return header
 
 
-def print_clinical_summary(metrics, report_header):
+def print_clinical_summary(metrics, report_header, cfg):
     """Print the formatted clinical summary to stdout."""
+    VERY_LOW = cfg['VERY_LOW']
+    LOW = cfg['LOW']
+    HIGH = cfg['HIGH']
+    VERY_HIGH = cfg['VERY_HIGH']
+    TIGHT_LOW = cfg['TIGHT_LOW']
+    TIGHT_HIGH = cfg['TIGHT_HIGH']
     tir = metrics['tir']
     titr = metrics['titr']
     tbr = metrics['tbr']
@@ -48,8 +54,8 @@ def print_clinical_summary(metrics, report_header):
     print("\n" + "="*60)
     print("CLINICAL SUMMARY")
     print("="*60)
-    print(f"Time in Range (70-180): {tir:.1f}% - {'Target met (≥70%)' if tir >= 70 else 'Below target'}")
-    print(f"Time in Tight Range (70-140): {titr:.1f}% - {'Excellent' if titr >= 50 else 'Room for improvement'}")
+    print(f"Time in Range ({LOW}-{HIGH}): {tir:.1f}% - {'Target met (≥70%)' if tir >= 70 else 'Below target'}")
+    print(f"Time in Tight Range ({TIGHT_LOW}-{TIGHT_HIGH}): {titr:.1f}% - {'Excellent' if titr >= 50 else 'Room for improvement'}")
     print(f"Time Below Range: {tbr:.1f}% - {'Target met (<4%)' if tbr < 4 else 'Above target'}")
     print(f"Glucose Variability (CV): {cv_percent:.1f}% - {'Stable (<36%)' if cv_percent < 36 else 'Unstable (≥36%)'}")
     print(f"Overall Trend: {trend_arrow} {trend_direction} (slope: {trend_slope:.1f} mg/dL/day)")
@@ -69,9 +75,9 @@ def print_clinical_summary(metrics, report_header):
         print(f"  → The median better represents typical glucose exposure")
     print("-"*60)
     print("\nGlucose Distribution Summary:")
-    print(f"  Very Low (<54 mg/dL): {very_low_pct:.1f}%")
-    print(f"  Low (54-69 mg/dL): {low_pct:.1f}%")
-    print(f"  Tight Target (70-140 mg/dL): {tight_target_pct:.1f}%")
-    print(f"  Above Tight (141-180 mg/dL): {above_tight_pct:.1f}%")
-    print(f"  High (181-250 mg/dL): {high_pct:.1f}%")
-    print(f"  Very High (>250 mg/dL): {very_high_pct:.1f}%")
+    print(f"  Very Low (<{VERY_LOW} mg/dL): {very_low_pct:.1f}%")
+    print(f"  Low ({VERY_LOW}-{LOW - 1} mg/dL): {low_pct:.1f}%")
+    print(f"  Tight Target ({TIGHT_LOW}-{TIGHT_HIGH} mg/dL): {tight_target_pct:.1f}%")
+    print(f"  Above Tight ({TIGHT_HIGH + 1}-{HIGH} mg/dL): {above_tight_pct:.1f}%")
+    print(f"  High ({HIGH + 1}-{VERY_HIGH} mg/dL): {high_pct:.1f}%")
+    print(f"  Very High (>{VERY_HIGH} mg/dL): {very_high_pct:.1f}%")

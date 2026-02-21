@@ -125,8 +125,14 @@ def generate_agp_plot(df, result, metrics, cfg, args, report_header):
     # Stacked bar chart of glucose distribution
     percentages = [very_low_pct, low_pct, tight_target_pct, above_tight_pct, high_pct, very_high_pct]
     colors = ['darkred', 'red', 'limegreen', 'yellowgreen', 'orange', 'darkorange']
-    labels = ['Very Low (<54)', 'Low (54-69)', 'Tight Target (70-140)',
-              'Above Tight (141-180)', 'High (181-250)', 'Very High (>250)']
+    labels = [
+        f'Very Low (<{VERY_LOW})',
+        f'Low ({VERY_LOW}-{LOW - 1})',
+        f'Tight Target ({TIGHT_LOW}-{TIGHT_HIGH})',
+        f'Above Tight ({TIGHT_HIGH + 1}-{HIGH})',
+        f'High ({HIGH + 1}-{VERY_HIGH})',
+        f'Very High (>{VERY_HIGH})',
+    ]
 
     bottoms = np.zeros(1)
     bars = []
@@ -171,9 +177,9 @@ def generate_agp_plot(df, result, metrics, cfg, args, report_header):
     ax1.axhspan(TIGHT_HIGH, HIGH, alpha=0.20, color='darkgreen',
                 label=f'Above Tight ({TIGHT_HIGH}-{HIGH})')
     ax1.axhspan(HIGH, 600, alpha=0.1, color='orange',
-                label='Above Range (>180)')
+                label=f'Above Range (>{HIGH})')
     ax1.axhspan(20, LOW, alpha=0.1, color='red',
-                label='Below Range (<70)')
+                label=f'Below Range (<{LOW})')
 
     ax1.axhline(mean_glucose, linestyle='-.', linewidth=2, color='purple', alpha=0.7, label='Overall Mean')
 
@@ -207,11 +213,11 @@ def generate_agp_plot(df, result, metrics, cfg, args, report_header):
 
     textstr = (
         f"TIME IN RANGE\n"
-        f"TIR (70-180): {tir:.1f}%\n"
-        f"TITR (70-140): {titr:.1f}%  ← Tight Target\n"
-        f"TATR (140-180): {tatr:.1f}%\n"
-        f"TAR >180: {tar:.1f}% (181-250: {tar_level1:.1f}%, >250: {tar_level2:.1f}%)\n"
-        f"TBR <70: {tbr:.1f}% (54-69: {tbr_level1:.1f}%, <54: {tbr_level2:.1f}%)\n\n"
+        f"TIR ({LOW}-{HIGH}): {tir:.1f}%\n"
+        f"TITR ({TIGHT_LOW}-{TIGHT_HIGH}): {titr:.1f}%  ← Tight Target\n"
+        f"TATR ({TIGHT_HIGH}-{HIGH}): {tatr:.1f}%\n"
+        f"TAR >{HIGH}: {tar:.1f}% ({HIGH + 1}-{VERY_HIGH}: {tar_level1:.1f}%, >{VERY_HIGH}: {tar_level2:.1f}%)\n"
+        f"TBR <{LOW}: {tbr:.1f}% ({VERY_LOW}-{LOW - 1}: {tbr_level1:.1f}%, <{VERY_LOW}: {tbr_level2:.1f}%)\n\n"
         f"GLUCOSE STATS\n"
         f"Mean: {mean_glucose:.1f} mg/dL, median: {median_glucose:.1f} mg/dL\n"
         f"Std: {std_glucose:.1f} mg/dL, mode: {mode_str} mg/dL\n"
@@ -275,37 +281,37 @@ def generate_agp_plot(df, result, metrics, cfg, args, report_header):
     if not tight_target_data.empty:
         ax3.scatter(tight_target_data['Time'], tight_target_data['Sensor Reading(mg/dL)'],
                    c=range_colors['Tight Target'], s=8, alpha=0.4,
-                   label=f'Tight Target (70-140): {len(tight_target_data)} pts', edgecolors='none')
+                   label=f'Tight Target ({TIGHT_LOW}-{TIGHT_HIGH}): {len(tight_target_data)} pts', edgecolors='none')
 
     above_tight_data = df[df['glucose_range'] == 'Above Tight']
     if not above_tight_data.empty:
         ax3.scatter(above_tight_data['Time'], above_tight_data['Sensor Reading(mg/dL)'],
                    c=range_colors['Above Tight'], s=10, alpha=0.5,
-                   label=f'Above Tight (141-180): {len(above_tight_data)} pts', edgecolors='none')
+                   label=f'Above Tight ({TIGHT_HIGH + 1}-{HIGH}): {len(above_tight_data)} pts', edgecolors='none')
 
     high_data = df[df['glucose_range'] == 'High']
     if not high_data.empty:
         ax3.scatter(high_data['Time'], high_data['Sensor Reading(mg/dL)'],
                    c=range_colors['High'], s=12, alpha=0.6,
-                   label=f'High (181-250): {len(high_data)} pts', edgecolors='none')
+                   label=f'High ({HIGH + 1}-{VERY_HIGH}): {len(high_data)} pts', edgecolors='none')
 
     very_high_data = df[df['glucose_range'] == 'Very High']
     if not very_high_data.empty:
         ax3.scatter(very_high_data['Time'], very_high_data['Sensor Reading(mg/dL)'],
                    c=range_colors['Very High'], s=12, alpha=0.7,
-                   label=f'Very High (>250): {len(very_high_data)} pts', edgecolors='none')
+                   label=f'Very High (>{VERY_HIGH}): {len(very_high_data)} pts', edgecolors='none')
 
     low_data = df[df['glucose_range'] == 'Low']
     if not low_data.empty:
         ax3.scatter(low_data['Time'], low_data['Sensor Reading(mg/dL)'],
                    c=range_colors['Low'], s=15, alpha=0.8,
-                   label=f'Low (54-69): {len(low_data)} pts', edgecolors='black', linewidth=0.5)
+                   label=f'Low ({VERY_LOW}-{LOW - 1}): {len(low_data)} pts', edgecolors='black', linewidth=0.5)
 
     very_low_data = df[df['glucose_range'] == 'Very Low']
     if not very_low_data.empty:
         ax3.scatter(very_low_data['Time'], very_low_data['Sensor Reading(mg/dL)'],
                    c=range_colors['Very Low'], s=20, alpha=1.0,
-                   label=f'Very Low (<54): {len(very_low_data)} pts', edgecolors='black', linewidth=0.8)
+                   label=f'Very Low (<{VERY_LOW}): {len(very_low_data)} pts', edgecolors='black', linewidth=0.8)
 
     ax3.axhspan(TIGHT_LOW, TIGHT_HIGH, alpha=0.1, color='limegreen')
     ax3.axhspan(TIGHT_HIGH, HIGH, alpha=0.07, color='green')

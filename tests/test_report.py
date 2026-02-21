@@ -16,6 +16,12 @@ def _make_args(**overrides):
     return argparse.Namespace(**defaults)
 
 
+DEFAULT_CFG = {
+    'VERY_LOW': 54, 'LOW': 70, 'HIGH': 180, 'VERY_HIGH': 250,
+    'TIGHT_LOW': 70, 'TIGHT_HIGH': 140,
+}
+
+
 SAMPLE_METRICS = {
     'tir': 70.0,
     'titr': 50.0,
@@ -62,20 +68,20 @@ def test_create_report_header_values():
 
 def test_print_clinical_summary_produces_output(capsys):
     header = create_report_header(_make_args())
-    print_clinical_summary(SAMPLE_METRICS, header)
+    print_clinical_summary(SAMPLE_METRICS, header, DEFAULT_CFG)
     captured = capsys.readouterr()
     assert len(captured.out) > 0
 
 
 def test_print_clinical_summary_contains_patient_name(capsys):
     header = create_report_header(_make_args(patient_name="Bob"))
-    print_clinical_summary(SAMPLE_METRICS, header)
+    print_clinical_summary(SAMPLE_METRICS, header, DEFAULT_CFG)
     captured = capsys.readouterr()
     assert "Bob" in captured.out
 
 
 def test_print_clinical_summary_contains_tir(capsys):
     header = create_report_header(_make_args())
-    print_clinical_summary(SAMPLE_METRICS, header)
+    print_clinical_summary(SAMPLE_METRICS, header, DEFAULT_CFG)
     captured = capsys.readouterr()
     assert "70.0" in captured.out
