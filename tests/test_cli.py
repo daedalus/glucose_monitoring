@@ -79,3 +79,15 @@ def test_custom_bin_minutes():
     parser = build_parser()
     args = parser.parse_args(["dummy.xlsx", "--bin-minutes", "15"])
     assert args.bin_minutes == 15
+
+
+def test_heatmap_defaults_false():
+    parser = build_parser()
+    args = parser.parse_args(["dummy.xlsx"])
+    assert args.heatmap is False
+
+
+def test_heatmap_set_when_passed():
+    parser = build_parser()
+    args = parser.parse_args(["dummy.xlsx", "--heatmap"])
+    assert args.heatmap is True

@@ -113,10 +113,16 @@ def generate_agp_plot(df, result, metrics, cfg, args, report_header):
     # --------------------------------------------------
     # Create figure with GridSpec for custom layout
     # --------------------------------------------------
-    fig = plt.figure(figsize=(18, 17))
-    gs = GridSpec(3, 12, figure=fig,
-                  height_ratios=[3, 1.5, 1.5],
-                  hspace=0.35, wspace=0.3)
+    if getattr(args, 'heatmap', False):
+        fig = plt.figure(figsize=(18, 17))
+        gs = GridSpec(3, 12, figure=fig,
+                      height_ratios=[3, 1.5, 1.5],
+                      hspace=0.35, wspace=0.3)
+    else:
+        fig = plt.figure(figsize=(18, 12))
+        gs = GridSpec(2, 12, figure=fig,
+                      height_ratios=[3, 1.5],
+                      hspace=0.35, wspace=0.3)
 
     # --- TOP ROW ---
     ax_bar = fig.add_subplot(gs[0, :2])
@@ -345,41 +351,42 @@ def generate_agp_plot(df, result, metrics, cfg, args, report_header):
                        edgecolor=trend_color, linewidth=1.5))
 
     # --- HEATMAP ROW: Circadian Glucose Heatmap ---
-    ax_heat = fig.add_subplot(gs[2, :])
+    if getattr(args, 'heatmap', False):
+        ax_heat = fig.add_subplot(gs[2, :])
 
-    heat_df = df[['Time', 'Sensor Reading(mg/dL)']].copy()
-    heat_df['hour'] = heat_df['Time'].dt.hour
-    heat_df['date'] = heat_df['Time'].dt.date
-    heat_data = heat_df.pivot_table(index='date', columns='hour',
-                                    values='Sensor Reading(mg/dL)', aggfunc='mean')
-    heat_data = heat_data.reindex(columns=range(24))
+        heat_df = df[['Time', 'Sensor Reading(mg/dL)']].copy()
+        heat_df['hour'] = heat_df['Time'].dt.hour
+        heat_df['date'] = heat_df['Time'].dt.date
+        heat_data = heat_df.pivot_table(index='date', columns='hour',
+                                        values='Sensor Reading(mg/dL)', aggfunc='mean')
+        heat_data = heat_data.reindex(columns=range(24))
 
-    heat_img = ax_heat.imshow(
-        heat_data.values,
-        aspect='auto',
-        cmap=args.heatmap_cmap,
-        vmin=40, vmax=300,
-        interpolation='nearest'
-    )
+        heat_img = ax_heat.imshow(
+            heat_data.values,
+            aspect='auto',
+            cmap=args.heatmap_cmap,
+            vmin=40, vmax=300,
+            interpolation='nearest'
+        )
 
-    cbar = plt.colorbar(heat_img, ax=ax_heat, pad=0.01)
-    cbar.set_label('Glucose (mg/dL)', fontsize=10)
+        cbar = plt.colorbar(heat_img, ax=ax_heat, pad=0.01)
+        cbar.set_label('Glucose (mg/dL)', fontsize=10)
 
-    ax_heat.set_xticks(range(24))
-    ax_heat.set_xticklabels([f'{h:02d}:00' for h in range(24)], fontsize=8, rotation=45, ha='right')
-    ax_heat.set_xlabel('Hour of Day', fontsize=10)
+        ax_heat.set_xticks(range(24))
+        ax_heat.set_xticklabels([f'{h:02d}:00' for h in range(24)], fontsize=8, rotation=45, ha='right')
+        ax_heat.set_xlabel('Hour of Day', fontsize=10)
 
-    date_labels = [str(d) for d in heat_data.index]
-    ax_heat.set_yticks(range(len(date_labels)))
-    ax_heat.set_yticklabels(date_labels, fontsize=8)
-    ax_heat.set_ylabel('Date', fontsize=10)
+        date_labels = [str(d) for d in heat_data.index]
+        ax_heat.set_yticks(range(len(date_labels)))
+        ax_heat.set_yticklabels(date_labels, fontsize=8)
+        ax_heat.set_ylabel('Date', fontsize=10)
 
-    WAKE_HOUR = 6
-    SLEEP_HOUR = 22
-    ax_heat.axvline(x=WAKE_HOUR - 0.5, color='white', linestyle='--', linewidth=1.2, alpha=0.8)
-    ax_heat.axvline(x=SLEEP_HOUR - 0.5, color='white', linestyle='--', linewidth=1.2, alpha=0.8)
+        WAKE_HOUR = 6
+        SLEEP_HOUR = 22
+        ax_heat.axvline(x=WAKE_HOUR - 0.5, color='white', linestyle='--', linewidth=1.2, alpha=0.8)
+        ax_heat.axvline(x=SLEEP_HOUR - 0.5, color='white', linestyle='--', linewidth=1.2, alpha=0.8)
 
-    ax_heat.set_title('Circadian Glucose Heatmap (Mean mg/dL per Hour)', fontsize=12, pad=10)
+        ax_heat.set_title('Circadian Glucose Heatmap (Mean mg/dL per Hour)', fontsize=12, pad=10)
 
     # Header
     header_text = f"Patient: {report_header['patient_name']} | ID: {report_header['patient_id']}"
@@ -398,8 +405,12 @@ def generate_agp_plot(df, result, metrics, cfg, args, report_header):
         plt.figtext(0.5, 0.94, f"Source: {report_header['data_source']}",
                     ha="center", fontsize=8, style='italic', color='gray')
 
-    plt.suptitle("Ambulatory Glucose Profile with Time in Tight Range (TITR), Raw Data Series and Circadian Heatmap",
-                 fontsize=14, y=0.92)
+    if getattr(args, 'heatmap', False):
+        plt.suptitle("Ambulatory Glucose Profile with Time in Tight Range (TITR), Raw Data Series and Circadian Heatmap",
+                     fontsize=14, y=0.92)
+    else:
+        plt.suptitle("Ambulatory Glucose Profile with Time in Tight Range (TITR) and Raw Data Series",
+                     fontsize=14, y=0.92)
     plt.tight_layout()
 
     metadata = {"Description": "Ambulatory Glucose Profile generated by AGP tool",
