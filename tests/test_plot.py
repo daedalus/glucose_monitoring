@@ -3,10 +3,11 @@ from unittest.mock import patch
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import pytest
 
 from agp.metrics import compute_all_metrics
-from agp.plot import build_agp_profile, generate_agp_plot
+from agp.plot import build_agp_profile, format_date_range, generate_agp_plot
 
 
 def _make_plot_args(**overrides):
@@ -63,3 +64,31 @@ def test_heatmap_subplot_present_when_enabled(df_with_roc, cfg, report_header):
     """With --heatmap, the figure should have 6 axes (heatmap + colorbar added)."""
     fig = _run_plot(df_with_roc, cfg, report_header, heatmap=True)
     assert len(fig.get_axes()) == 6
+
+
+# --- format_date_range tests ---
+
+def test_format_date_range_normal(glucose_df):
+    """Normal multi-day dataset returns first and last date in YYYY-MM-DD \u2013 YYYY-MM-DD format."""
+    result = format_date_range(glucose_df)
+    first = glucose_df["Time"].min().strftime("%Y-%m-%d")
+    last = glucose_df["Time"].max().strftime("%Y-%m-%d")
+    assert result == f"{first} \u2013 {last}"
+
+
+def test_format_date_range_single_row():
+    """Single-row dataset returns the same date for both start and end."""
+    df = pd.DataFrame({
+        "Time": [pd.Timestamp("2024-03-15")],
+        "Sensor Reading(mg/dL)": [100.0],
+    })
+    assert format_date_range(df) == "2024-03-15 \u2013 2024-03-15"
+
+
+def test_format_date_range_empty():
+    """Empty dataset returns 'N/A' without raising."""
+    df = pd.DataFrame({
+        "Time": pd.Series(dtype="datetime64[ns]"),
+        "Sensor Reading(mg/dL)": pd.Series(dtype=float),
+    })
+    assert format_date_range(df) == "N/A"

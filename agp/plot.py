@@ -5,6 +5,18 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.patches import Patch
 
 
+def format_date_range(df):
+    """Return 'YYYY-MM-DD \u2013 YYYY-MM-DD' covering the mg/dL data in *df*.
+
+    Returns 'N/A' when *df* has no rows.
+    """
+    if df.empty:
+        return "N/A"
+    first = df["Time"].min().strftime("%Y-%m-%d")
+    last = df["Time"].max().strftime("%Y-%m-%d")
+    return f"{first} \u2013 {last}"
+
+
 def build_agp_profile(df, cfg):
     """Perform the circadian binning and return the result DataFrame."""
     BIN_MINUTES = cfg['BIN_MINUTES']
@@ -389,6 +401,7 @@ def generate_agp_plot(df, result, metrics, cfg, args, report_header):
         ax_heat.set_title('Circadian Glucose Heatmap (Mean mg/dL per Hour)', fontsize=12, pad=10)
 
     # Header
+    date_range_str = format_date_range(df)
     header_text = f"Patient: {report_header['patient_name']} | ID: {report_header['patient_id']}"
     if report_header['doctor']:
         header_text += f" | Dr: {report_header['doctor']}"
@@ -399,10 +412,10 @@ def generate_agp_plot(df, result, metrics, cfg, args, report_header):
                 bbox=dict(boxstyle="round,pad=0.3", facecolor='lightgray', alpha=0.3))
 
     if report_header['notes']:
-        plt.figtext(0.5, 0.94, f"Notes: {report_header['notes']} | Source: {report_header['data_source']}",
+        plt.figtext(0.5, 0.94, f"Notes: {report_header['notes']} | Source: {report_header['data_source']} | Data range: {date_range_str}",
                     ha="center", fontsize=8, style='italic', color='gray')
     else:
-        plt.figtext(0.5, 0.94, f"Source: {report_header['data_source']}",
+        plt.figtext(0.5, 0.94, f"Source: {report_header['data_source']} | Data range: {date_range_str}",
                     ha="center", fontsize=8, style='italic', color='gray')
 
     if getattr(args, 'heatmap', False):
