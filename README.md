@@ -72,25 +72,52 @@ Required columns:
 ### Usage ###
 
 ```
-python main.py input_file [options]
+usage: main.py [-h] [--output OUTPUT] [--very-low-threshold VERY_LOW_THRESHOLD] [--low-threshold LOW_THRESHOLD] [--high-threshold HIGH_THRESHOLD]
+               [--very-high-threshold VERY_HIGH_THRESHOLD] [--tight-low TIGHT_LOW] [--tight-high TIGHT_HIGH] [--bin-minutes BIN_MINUTES]
+               [--sensor-interval SENSOR_INTERVAL] [--min-samples MIN_SAMPLES] [--no-plot] [--verbose] [--export EXPORT] [--config CONFIG] [--version]
+               [--patient-name PATIENT_NAME] [--patient-id PATIENT_ID] [--doctor DOCTOR] [--notes NOTES] [--heatmap] [--heatmap-cmap HEATMAP_CMAP]
+               input_file
 
-Supported input formats: .xlsx, .xls, .csv, .ods
+Generate Ambulatory Glucose Profile from sensor data
 
-Options:
-  --output, -o           Output PNG filename
-  --low-threshold        Low glucose threshold (default: 70)
-  --high-threshold       High glucose threshold (default: 180)
-  --tight-low           Tight range lower limit (default: 70)
-  --tight-high          Tight range upper limit (default: 140)
-  --bin-minutes         Time bin size for AGP (default: 5)
-  --min-samples         Minimum samples per bin (default: 5)
-  --patient-name, -n    Patient name
-  --patient-id, -id     Patient ID
-  --doctor, -d          Doctor name
-  --notes, -note        Additional notes
-  --verbose, -v         Print detailed metrics
-  --config, -c          Load configuration from JSON file
-  --heatmap-cmap        Colormap for circadian heatmap (default: RdYlGn_r)
+positional arguments:
+  input_file            Path to glucose data file (.xlsx, .xls, .csv, .ods)
+
+options:
+  -h, --help            show this help message and exit
+  --output, -o OUTPUT   Output PNG filename (default: ambulatory_glucose_profile.png)
+  --very-low-threshold VERY_LOW_THRESHOLD
+                        Very low glucose threshold in mg/dL (default: 54)
+  --low-threshold LOW_THRESHOLD
+                        Low glucose threshold in mg/dL (default: 70)
+  --high-threshold HIGH_THRESHOLD
+                        High glucose threshold in mg/dL (default: 180)
+  --very-high-threshold VERY_HIGH_THRESHOLD
+                        Very high glucose threshold in mg/dL (default: 250)
+  --tight-low TIGHT_LOW
+                        Tight range lower limit in mg/dL (default: 70)
+  --tight-high TIGHT_HIGH
+                        Tight range upper limit in mg/dL (default: 140)
+  --bin-minutes BIN_MINUTES
+                        Time bin size in minutes for AGP (default: 5)
+  --sensor-interval SENSOR_INTERVAL
+                        CGM Sensor interval (default: 5)
+  --min-samples MIN_SAMPLES
+                        Minimum samples per bin (default: 5)
+  --no-plot             Calculate metrics only, do not generate plot
+  --verbose, -v         Print detailed metrics during execution
+  --export, -e EXPORT   Export metrics to file. Use .csv or .json extension (e.g. metrics.json)
+  --config, -c CONFIG   Configuration file with parameters
+  --version             show program's version number and exit
+  --patient-name, -n PATIENT_NAME
+                        Patient name for report header
+  --patient-id, -id PATIENT_ID
+                        Patient ID for report header
+  --doctor, -d DOCTOR   Doctor name for report header
+  --notes, -note NOTES  Additional notes for report header
+  --heatmap             Enable the circadian glucose heatmap (disabled by default)
+  --heatmap-cmap HEATMAP_CMAP
+                        Colormap for circadian heatmap (default: RdYlGn_r, requires --heatmap)
 ```
 
 #### Examples ####
