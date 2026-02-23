@@ -1,5 +1,7 @@
 # Ambulatory glucose profile analysis tool
 
+[![Tests](https://github.com/daedalus/agp_tool/actions/workflows/tests.yml/badge.svg)](https://github.com/daedalus/agp_tool/actions/workflows/tests.yml)
+
 ## DISCLAIMER
 
 This tool is for research and educational purposes only. It is NOT a medical device and has NOT been validated for clinical diagnosis or treatment decisions.
