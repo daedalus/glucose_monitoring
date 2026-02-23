@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0,<75.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agp"
-version = "1.0.0"
+name = "agp_tool"
+version = "0.1.0"
 description = "Ambulatory glucose profile analysis tool"
 readme = "README.md"
 license = { file = "LICENSE" }
