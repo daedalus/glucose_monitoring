@@ -23,6 +23,8 @@ def _sniff_format(path: str):
     format cannot be determined from content alone.  CSV detection is
     intentionally omitted because sniffing is unreliable for plain-text files.
     """
+    if "../" in path or "..\\" in path:
+        raise Exception("Invalid file path")
     with open(path, 'rb') as f:
         header = f.read(8)
 
