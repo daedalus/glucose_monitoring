@@ -1,8 +1,10 @@
+import shutil
+
 import numpy as np
 import pandas as pd
 import pytest
 
-from agp.data import load_and_preprocess
+from agp.data import _sniff_format, load_and_preprocess
 
 
 def _write_excel(path, df):
@@ -106,3 +108,38 @@ def test_unsupported_extension_raises_value_error(tmp_path, cfg):
     path_obj.write_text("dummy")
     with pytest.raises(ValueError, match="Unsupported file format"):
         load_and_preprocess(str(path_obj), cfg)
+
+
+# ---------------------------------------------------------------------------
+# Content-sniffing tests
+# ---------------------------------------------------------------------------
+
+def test_sniff_format_returns_xlsx_for_xlsx_file(tmp_path):
+    path = str(tmp_path / "glucose.xlsx")
+    _write_excel(path, _valid_df())
+    assert _sniff_format(path) == 'xlsx'
+
+
+def test_sniff_format_returns_ods_for_ods_file(tmp_path):
+    path = str(tmp_path / "glucose.ods")
+    _write_ods(path, _valid_df())
+    assert _sniff_format(path) == 'ods'
+
+
+def test_sniff_format_returns_none_for_csv(tmp_path):
+    path = str(tmp_path / "glucose.csv")
+    _write_csv(path, _valid_df())
+    assert _sniff_format(path) is None
+
+
+def test_xlsx_content_with_xls_extension_loads_correctly(tmp_path, cfg):
+    """An xlsx file given a misleading .xls extension must still load via content sniffing."""
+    xlsx_path = str(tmp_path / "glucose.xlsx")
+    _write_excel(xlsx_path, _valid_df())
+    misleading_path = str(tmp_path / "glucose_misleading.xls")
+    shutil.copy(xlsx_path, misleading_path)
+
+    result = load_and_preprocess(misleading_path, cfg)
+    assert "Time" in result.columns
+    assert "Sensor Reading(mg/dL)" in result.columns
+    assert "ROC" in result.columns
