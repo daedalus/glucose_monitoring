@@ -170,7 +170,7 @@ def generate_agp_plot(df, result, metrics, cfg, args, report_header):
 
     bottoms = np.zeros(1)
     bars = []
-    for i, (pct, color) in enumerate(zip(percentages, colors)):
+    for _, (pct, color) in enumerate(zip(percentages, colors)):
         if pct > 0:
             bar = ax_bar.bar(
                 0,
@@ -207,7 +207,7 @@ def generate_agp_plot(df, result, metrics, cfg, args, report_header):
     ax_bar.set_axisbelow(True)
 
     legend_elements = []
-    for i, (label, color, pct) in enumerate(zip(labels, colors, percentages)):
+    for _, (label, color, pct) in enumerate(zip(labels, colors, percentages)):
         if pct > 0:
             legend_elements.append(
                 plt.Rectangle((0, 0), 1, 1, facecolor=color, edgecolor="white")
