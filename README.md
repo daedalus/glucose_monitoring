@@ -12,37 +12,37 @@ This tool generates a comprehensive Ambulatory Glucose Profile (AGP) with extend
 
 ### Features ###
 
-#### General  ####
+#### General ####
 
 - Full AGP visualization with percentile curves (5-95%, IQR)
 - Rate of Change (ROC) profile
 - Circadian binning for time-of-day patterns
 - Circadian glucose heatmap
 
-#### Time in Range metrics with level breakdowns: ####
+#### Time in Range metrics with level breakdowns ####
 
 - TIR (70-180 mg/dL)
 - TITR (70-140 mg/dL) - Tight target
 - TAR with Level 1 (181-250) and Level 2 (>250)
 - TBR with Level 1 (54-69) and Level 2 (<54)
 
-#### Advanced variability metrics: ####
+#### Advanced variability metrics ####
 
 - MAGE (Mean Amplitude of Glycemic Excursions)
 - MODD (Mean of Daily Differences)
 - CONGA (Continuous Overall Net Glycemic Action)
 
-#### Risk indices: ####
+#### Risk indices ####
 
 - LBGI (Low Blood Glucose Index)
 - HBGI (High Blood Glucose Index)
 - ADRR (Average Daily Risk Range)
 
-### AUC analysis: ####
+### AUC analysis ####
 
 - total, above range, below range
 
-### Data quality assessment: ####
+### Data quality assessment ####
 
 - wear time, reading frequency
 
@@ -66,7 +66,7 @@ Supported file formats:
 | `.ods` | OpenDocument Spreadsheet |
 
 Required columns:
-- **Time**: datetime (e.g., "2024-01-01 08:00:00")
+
 - **Sensor Reading(mg/dL)**: numeric glucose values
 
 ### Usage ###
