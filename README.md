@@ -12,6 +12,8 @@ Do not adjust medications, change diet, or make health decisions based solely on
 
 This tool generates a comprehensive Ambulatory Glucose Profile (AGP) with extended clinical metrics, including Time in Tight Range (TITR) metric. It processes continuous glucose monitoring (CGM) data and produces both a visual AGP plot and detailed statistical analysis.
 
+This application should work with data from any CGM, however it was only tested with Sibionics GS1. For other models we need more data.
+
 ## Features
 
 ### General
