@@ -194,7 +194,7 @@ Supported file formats:
 ## Usage
 
 ```
-usage: main.py [-h] [--output OUTPUT] [--very-low-threshold VERY_LOW_THRESHOLD] [--low-threshold LOW_THRESHOLD] [--high-threshold HIGH_THRESHOLD]
+usage: agp_tool [-h] [--output OUTPUT] [--very-low-threshold VERY_LOW_THRESHOLD] [--low-threshold LOW_THRESHOLD] [--high-threshold HIGH_THRESHOLD]
                [--very-high-threshold VERY_HIGH_THRESHOLD] [--tight-low TIGHT_LOW] [--tight-high TIGHT_HIGH] [--bin-minutes BIN_MINUTES]
                [--sensor-interval SENSOR_INTERVAL] [--min-samples MIN_SAMPLES] [--no-plot] [--verbose] [--export EXPORT] [--config CONFIG] [--version]
                [--patient-name PATIENT_NAME] [--patient-id PATIENT_ID] [--doctor DOCTOR] [--notes NOTES] [--heatmap] [--heatmap-cmap HEATMAP_CMAP]

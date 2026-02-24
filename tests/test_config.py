@@ -1,5 +1,7 @@
 import argparse
 
+import pytest
+
 from agp.config import build_config
 
 
@@ -51,30 +53,29 @@ def test_build_config_default_values():
     assert cfg["ROC_CLIP"] == 10
 
 
-def test_build_config_bin_minutes_defaults_to_1_when_zero():
-    cfg = build_config(_make_args(bin_minutes=0))
-    assert cfg["BIN_MINUTES"] == 1
+def test_build_config_bin_minutes_raises_when_zero():
+    with pytest.raises(ValueError, match="bin_minutes must be positive"):
+        build_config(_make_args(bin_minutes=0))
 
 
-def test_build_config_bin_minutes_defaults_to_1_when_negative():
-    cfg = build_config(_make_args(bin_minutes=-3))
-    assert cfg["BIN_MINUTES"] == 1
+def test_build_config_bin_minutes_raises_when_negative():
+    with pytest.raises(ValueError, match="bin_minutes must be positive"):
+        build_config(_make_args(bin_minutes=-3))
 
 
-def test_build_config_sensor_interval_defaults_to_5_when_zero():
-    cfg = build_config(_make_args(sensor_interval=0))
-    assert cfg["SENSOR_INTERVAL"] == 5
+def test_build_config_sensor_interval_raises_when_zero():
+    with pytest.raises(ValueError, match="sensor_interval must be positive"):
+        build_config(_make_args(sensor_interval=0))
 
 
-def test_build_config_sensor_interval_defaults_to_5_when_negative():
-    cfg = build_config(_make_args(sensor_interval=-1))
-    assert cfg["SENSOR_INTERVAL"] == 5
+def test_build_config_sensor_interval_raises_when_negative():
+    with pytest.raises(ValueError, match="sensor_interval must be positive"):
+        build_config(_make_args(sensor_interval=-1))
 
 
 def test_build_config_roc_clip_always_10():
-    for val in [0, -5, 100]:
-        cfg = build_config(_make_args(bin_minutes=val))
-        assert cfg["ROC_CLIP"] == 10
+    cfg = build_config(_make_args())
+    assert cfg["ROC_CLIP"] == 10
 
 
 def test_build_config_custom_thresholds():
@@ -90,3 +91,38 @@ def test_build_config_custom_thresholds():
     assert cfg["LOW"] == 80
     assert cfg["HIGH"] == 160
     assert cfg["VERY_HIGH"] == 200
+
+
+def test_build_config_raises_when_threshold_order_violated():
+    with pytest.raises(ValueError, match="very_low <= low <= high <= very_high"):
+        build_config(_make_args(low_threshold=200, high_threshold=100))
+
+
+def test_build_config_raises_when_very_low_exceeds_low():
+    with pytest.raises(ValueError, match="very_low <= low <= high <= very_high"):
+        build_config(_make_args(very_low_threshold=80, low_threshold=70))
+
+
+def test_build_config_raises_when_high_exceeds_very_high():
+    with pytest.raises(ValueError, match="very_low <= low <= high <= very_high"):
+        build_config(_make_args(high_threshold=300, very_high_threshold=250))
+
+
+def test_build_config_raises_when_tight_low_equals_tight_high():
+    with pytest.raises(ValueError, match="tight_low must be less than tight_high"):
+        build_config(_make_args(tight_low=140, tight_high=140))
+
+
+def test_build_config_raises_when_tight_low_exceeds_tight_high():
+    with pytest.raises(ValueError, match="tight_low must be less than tight_high"):
+        build_config(_make_args(tight_low=150, tight_high=140))
+
+
+def test_build_config_raises_when_min_samples_zero():
+    with pytest.raises(ValueError, match="min_samples must be positive"):
+        build_config(_make_args(min_samples=0))
+
+
+def test_build_config_raises_when_min_samples_negative():
+    with pytest.raises(ValueError, match="min_samples must be positive"):
+        build_config(_make_args(min_samples=-1))
