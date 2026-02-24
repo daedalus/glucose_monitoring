@@ -3,9 +3,9 @@ import json
 from importlib.metadata import PackageNotFoundError, version
 
 try:
-    __version__ = version("agp")
+    __version__ = version("agp_tool")
 except PackageNotFoundError:
-    __version__ = "1.0.0"
+    __version__ = "unknown"
 
 
 def build_parser():

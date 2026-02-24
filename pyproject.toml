@@ -41,6 +41,7 @@ Repository = "https://github.com/daedalus/agp_tool"
 "Bug Tracker" = "https://github.com/daedalus/agp_tool/issues"
 
 [project.scripts]
+agp_tool = "agp.main:main"
 agp = "agp.main:main"
 
 [project.optional-dependencies]
