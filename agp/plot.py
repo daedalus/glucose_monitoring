@@ -60,6 +60,113 @@ def build_agp_profile(df, cfg):
     return result
 
 
+def _draw_daily_axes(ax, df, cfg):
+    """Draw daily overlay content onto *ax*.
+
+    Draws glucose-range bands, threshold lines, per-day colored lines,
+    axis labels, grid, night shading, and legend on the provided axes object.
+
+    Args:
+        ax: matplotlib Axes to draw on.
+        df: Preprocessed glucose DataFrame with ``Time`` and
+            ``Sensor Reading(mg/dL)`` columns.
+        cfg: Configuration dict from :func:`build_config`.
+    """
+    VERY_LOW = cfg["VERY_LOW"]
+    LOW = cfg["LOW"]
+    HIGH = cfg["HIGH"]
+    VERY_HIGH = cfg["VERY_HIGH"]
+    TIGHT_LOW = cfg["TIGHT_LOW"]
+    TIGHT_HIGH = cfg["TIGHT_HIGH"]
+
+    df = df.copy()
+    df["date"] = df["Time"].dt.date
+    df["minutes"] = (
+        df["Time"].dt.hour * 60 + df["Time"].dt.minute + df["Time"].dt.second / 60
+    )
+
+    dates = sorted(df["date"].unique())
+    cmap = plt.colormaps.get_cmap("tab20")
+    colors = [cmap(i / max(len(dates), 1)) for i in range(len(dates))]
+
+    # Shaded glucose-range bands
+    ax.axhspan(
+        TIGHT_LOW,
+        TIGHT_HIGH,
+        alpha=0.12,
+        color="limegreen",
+        label=f"Tight Target ({TIGHT_LOW}–{TIGHT_HIGH})",
+    )
+    ax.axhspan(
+        TIGHT_HIGH,
+        HIGH,
+        alpha=0.10,
+        color="darkgreen",
+        label=f"Above Tight ({TIGHT_HIGH}–{HIGH})",
+    )
+    ax.axhspan(HIGH, 600, alpha=0.08, color="orange", label=f"Above Range (>{HIGH})")
+    ax.axhspan(20, LOW, alpha=0.08, color="red", label=f"Below Range (<{LOW})")
+
+    # Threshold reference lines
+    ax.axhline(LOW, linestyle=":", linewidth=1, color="darkred", alpha=0.5)
+    ax.axhline(HIGH, linestyle=":", linewidth=1, color="darkred", alpha=0.5)
+    ax.axhline(VERY_LOW, linestyle=":", linewidth=1, color="maroon", alpha=0.4)
+    ax.axhline(VERY_HIGH, linestyle=":", linewidth=1, color="darkorange", alpha=0.4)
+    ax.axhline(TIGHT_HIGH, linestyle=":", linewidth=1, color="darkgreen", alpha=0.4)
+
+    for date, color in zip(dates, colors):
+        day_df = df[df["date"] == date].sort_values("minutes")
+        ax.plot(
+            day_df["minutes"],
+            day_df["Sensor Reading(mg/dL)"],
+            linewidth=1.2,
+            alpha=0.8,
+            color=color,
+            label=str(date),
+        )
+
+    xticks = np.arange(0, 1441, 120)
+    ax.set_xticks(xticks)
+    ax.set_xticklabels([f"{int(t // 60):02d}:00" for t in xticks])
+    ax.set_xlim(0, 1440)
+    ax.set_ylim(20, max(400, df["Sensor Reading(mg/dL)"].max() + 20))
+
+    ax.set_xlabel("Time of Day", fontsize=12)
+    ax.set_ylabel("Glucose (mg/dL)", fontsize=12)
+    ax.set_title(
+        "Daily Glucose Overlay – each day as a separate line", fontsize=13, pad=10
+    )
+    ax.grid(True, alpha=0.25)
+
+    # Night shading
+    ax.axvspan(22 * 60, 24 * 60, alpha=0.05, color="gray")
+    ax.axvspan(0, 6 * 60, alpha=0.05, color="gray")
+
+    # Build legend: day lines first, then range bands
+    day_handles = [
+        Line2D([0], [0], color=color, linewidth=1.5, label=str(date))
+        for date, color in zip(dates, colors)
+    ]
+    band_handles, band_labels = ax.get_legend_handles_labels()
+    # band_handles come from axhspan/axhline calls; keep only the named ones
+    named = [
+        (h, lbl) for h, lbl in zip(band_handles, band_labels) if not lbl.startswith("_")
+    ]
+    band_h = [h for h, _ in named]
+    band_l = [lbl for _, lbl in named]
+
+    ax.legend(
+        day_handles + band_h,
+        [str(d) for d in dates] + band_l,
+        loc="upper right",
+        fontsize=8,
+        ncol=max(1, (len(dates) + 4) // 5),
+        framealpha=0.9,
+        title="Day / Range",
+        title_fontsize=9,
+    )
+
+
 def generate_agp_plot(
     df,
     result,
@@ -71,6 +178,7 @@ def generate_agp_plot(
     output_path=None,
     show=False,
     close=False,
+    daily_plot=False,
 ):
     """Render the full AGP figure and return it.
 
@@ -87,6 +195,8 @@ def generate_agp_plot(
             also ``None`` / falsy) to skip saving entirely.
         show: If ``True`` call ``plt.show()`` after building the figure.
         close: If ``True`` call ``plt.close()`` after building the figure.
+        daily_plot: If ``True`` add an extra daily overlay panel at the bottom
+            of the figure.  Default: ``False``.
 
     Returns:
         matplotlib.figure.Figure: The completed AGP figure.
@@ -165,15 +275,27 @@ def generate_agp_plot(
     # Create figure with GridSpec for custom layout
     # --------------------------------------------------
     if getattr(args, "heatmap", False):
-        fig = plt.figure(figsize=(18, 17))
-        gs = GridSpec(
-            3, 12, figure=fig, height_ratios=[3, 1.5, 1.5], hspace=0.35, wspace=0.3
-        )
+        if daily_plot:
+            fig = plt.figure(figsize=(18, 21))
+            gs = GridSpec(
+                4, 12, figure=fig, height_ratios=[3, 1.5, 1.5, 2], hspace=0.35, wspace=0.3
+            )
+        else:
+            fig = plt.figure(figsize=(18, 17))
+            gs = GridSpec(
+                3, 12, figure=fig, height_ratios=[3, 1.5, 1.5], hspace=0.35, wspace=0.3
+            )
     else:
-        fig = plt.figure(figsize=(18, 12))
-        gs = GridSpec(
-            2, 12, figure=fig, height_ratios=[3, 1.5], hspace=0.35, wspace=0.3
-        )
+        if daily_plot:
+            fig = plt.figure(figsize=(18, 16))
+            gs = GridSpec(
+                3, 12, figure=fig, height_ratios=[3, 1.5, 2], hspace=0.35, wspace=0.3
+            )
+        else:
+            fig = plt.figure(figsize=(18, 12))
+            gs = GridSpec(
+                2, 12, figure=fig, height_ratios=[3, 1.5], hspace=0.35, wspace=0.3
+            )
 
     # --- TOP ROW ---
     ax_bar = fig.add_subplot(gs[0, :2])
@@ -591,6 +713,12 @@ def generate_agp_plot(
             "Circadian Glucose Heatmap (Mean mg/dL per Hour)", fontsize=12, pad=10
         )
 
+    # --- DAILY ROW: Daily Glucose Overlay ---
+    if daily_plot:
+        daily_row = 3 if getattr(args, "heatmap", False) else 2
+        ax_daily = fig.add_subplot(gs[daily_row, :])
+        _draw_daily_axes(ax_daily, df, cfg)
+
     # Header
     date_range_str = format_date_range(df)
     header_text = (
@@ -632,17 +760,31 @@ def generate_agp_plot(
         )
 
     if getattr(args, "heatmap", False):
-        plt.suptitle(
-            "Ambulatory Glucose Profile with Time in Tight Range (TITR), Raw Data Series and Circadian Heatmap",
-            fontsize=14,
-            y=0.92,
-        )
+        if daily_plot:
+            plt.suptitle(
+                "Ambulatory Glucose Profile with Time in Tight Range (TITR), Raw Data Series, Circadian Heatmap and Daily Overlay",
+                fontsize=14,
+                y=0.92,
+            )
+        else:
+            plt.suptitle(
+                "Ambulatory Glucose Profile with Time in Tight Range (TITR), Raw Data Series and Circadian Heatmap",
+                fontsize=14,
+                y=0.92,
+            )
     else:
-        plt.suptitle(
-            "Ambulatory Glucose Profile with Time in Tight Range (TITR) and Raw Data Series",
-            fontsize=14,
-            y=0.92,
-        )
+        if daily_plot:
+            plt.suptitle(
+                "Ambulatory Glucose Profile with Time in Tight Range (TITR), Raw Data Series and Daily Overlay",
+                fontsize=14,
+                y=0.92,
+            )
+        else:
+            plt.suptitle(
+                "Ambulatory Glucose Profile with Time in Tight Range (TITR) and Raw Data Series",
+                fontsize=14,
+                y=0.92,
+            )
     plt.tight_layout()
 
     metadata = {
@@ -709,101 +851,9 @@ def generate_daily_plot(
     Returns:
         matplotlib.figure.Figure: The completed daily overlay figure.
     """
-    VERY_LOW = cfg["VERY_LOW"]
-    LOW = cfg["LOW"]
-    HIGH = cfg["HIGH"]
-    VERY_HIGH = cfg["VERY_HIGH"]
-    TIGHT_LOW = cfg["TIGHT_LOW"]
-    TIGHT_HIGH = cfg["TIGHT_HIGH"]
-
-    df = df.copy()
-    df["date"] = df["Time"].dt.date
-    df["minutes"] = (
-        df["Time"].dt.hour * 60 + df["Time"].dt.minute + df["Time"].dt.second / 60
-    )
-
-    dates = sorted(df["date"].unique())
-    cmap = plt.colormaps.get_cmap("tab20")
-    colors = [cmap(i / max(len(dates), 1)) for i in range(len(dates))]
-
     fig, ax = plt.subplots(figsize=(14, 7))
 
-    # Shaded glucose-range bands
-    ax.axhspan(
-        TIGHT_LOW,
-        TIGHT_HIGH,
-        alpha=0.12,
-        color="limegreen",
-        label=f"Tight Target ({TIGHT_LOW}–{TIGHT_HIGH})",
-    )
-    ax.axhspan(
-        TIGHT_HIGH,
-        HIGH,
-        alpha=0.10,
-        color="darkgreen",
-        label=f"Above Tight ({TIGHT_HIGH}–{HIGH})",
-    )
-    ax.axhspan(HIGH, 600, alpha=0.08, color="orange", label=f"Above Range (>{HIGH})")
-    ax.axhspan(20, LOW, alpha=0.08, color="red", label=f"Below Range (<{LOW})")
-
-    # Threshold reference lines
-    ax.axhline(LOW, linestyle=":", linewidth=1, color="darkred", alpha=0.5)
-    ax.axhline(HIGH, linestyle=":", linewidth=1, color="darkred", alpha=0.5)
-    ax.axhline(VERY_LOW, linestyle=":", linewidth=1, color="maroon", alpha=0.4)
-    ax.axhline(VERY_HIGH, linestyle=":", linewidth=1, color="darkorange", alpha=0.4)
-    ax.axhline(TIGHT_HIGH, linestyle=":", linewidth=1, color="darkgreen", alpha=0.4)
-
-    for date, color in zip(dates, colors):
-        day_df = df[df["date"] == date].sort_values("minutes")
-        ax.plot(
-            day_df["minutes"],
-            day_df["Sensor Reading(mg/dL)"],
-            linewidth=1.2,
-            alpha=0.8,
-            color=color,
-            label=str(date),
-        )
-
-    xticks = np.arange(0, 1441, 120)
-    ax.set_xticks(xticks)
-    ax.set_xticklabels([f"{int(t // 60):02d}:00" for t in xticks])
-    ax.set_xlim(0, 1440)
-    ax.set_ylim(20, max(400, df["Sensor Reading(mg/dL)"].max() + 20))
-
-    ax.set_xlabel("Time of Day", fontsize=12)
-    ax.set_ylabel("Glucose (mg/dL)", fontsize=12)
-    ax.set_title(
-        "Daily Glucose Overlay – each day as a separate line", fontsize=13, pad=10
-    )
-    ax.grid(True, alpha=0.25)
-
-    # Night shading
-    ax.axvspan(22 * 60, 24 * 60, alpha=0.05, color="gray")
-    ax.axvspan(0, 6 * 60, alpha=0.05, color="gray")
-
-    # Build legend: day lines first, then range bands
-    day_handles = [
-        Line2D([0], [0], color=color, linewidth=1.5, label=str(date))
-        for date, color in zip(dates, colors)
-    ]
-    band_handles, band_labels = ax.get_legend_handles_labels()
-    # band_handles come from axhspan/axhline calls; keep only the named ones
-    named = [
-        (h, lbl) for h, lbl in zip(band_handles, band_labels) if not lbl.startswith("_")
-    ]
-    band_h = [h for h, _ in named]
-    band_l = [lbl for _, lbl in named]
-
-    ax.legend(
-        day_handles + band_h,
-        [str(d) for d in dates] + band_l,
-        loc="upper right",
-        fontsize=8,
-        ncol=max(1, (len(dates) + 4) // 5),
-        framealpha=0.9,
-        title="Day / Range",
-        title_fontsize=9,
-    )
+    _draw_daily_axes(ax, df, cfg)
 
     # Header
     date_range_str = format_date_range(df)
