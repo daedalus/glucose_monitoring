@@ -130,12 +130,12 @@ def build_parser():
     parser.add_argument(
         "--daily-plot",
         action="store_true",
-        help="Generate an additional daily overlay plot where each day is shown as a separate colored line",
+        help="Embed an additional daily overlay panel in the output PNG where each day is shown as a separate colored line",
     )
     parser.add_argument(
         "--daily-plot-only",
         action="store_true",
-        help="Generate only the daily overlay plot (skip the main AGP plot)",
+        help="Output only the daily overlay plot (skip the main AGP graph); saved to --output",
     )
 
     return parser

@@ -191,7 +191,7 @@ class ReportGenerator:
     # Graph generation
     # ------------------------------------------------------------------
 
-    def plot_agp(self, output=None, show=False, close=False):
+    def plot_agp(self, output=None, show=False, close=False, daily_plot=False):
         """Generate the full AGP figure and return it.
 
         Args:
@@ -200,6 +200,8 @@ class ReportGenerator:
                 used.  Pass an empty string ``""`` to skip saving.
             show (bool): Call ``plt.show()`` after building. Default: ``False``.
             close (bool): Call ``plt.close()`` after building. Default: ``False``.
+            daily_plot (bool): Embed an additional daily overlay panel at the
+                bottom of the figure.  Default: ``False``.
 
         Returns:
             matplotlib.figure.Figure: The completed AGP figure.
@@ -216,6 +218,7 @@ class ReportGenerator:
             output_path=_output,
             show=show,
             close=close,
+            daily_plot=daily_plot,
         )
 
     def plot_daily(self, output=None, show=False, close=False):
@@ -342,14 +345,11 @@ def generate_report(
         heatmap_cmap (str): Colormap name for the circadian heatmap.
             Default: ``"RdYlGn_r"``.
         pdf (bool): Also produce a PDF file alongside the PNG. Default: ``False``.
-        daily_plot (bool): Generate an additional daily overlay plot where each
-            day is shown as a separate colored line.  The figure is saved next
-            to *output* with ``_daily`` appended before the extension.
-            Default: ``False``.
-        daily_plot_only (bool): When ``True``, skip the main AGP plot and
-            generate only the daily overlay plot.  Implies ``daily_plot=True``
-            for the purpose of generating the daily figure.  ``no_plot`` still
-            takes precedence when both are set.  Default: ``False``.
+        daily_plot (bool): Embed an additional daily overlay panel at the bottom
+            of the main AGP figure.  Default: ``False``.
+        daily_plot_only (bool): Skip the main AGP plot and output only the daily
+            overlay as a standalone figure saved to *output*.  ``no_plot`` still
+            takes precedence.  Default: ``False``.
         show (bool): Call ``plt.show()`` after building the figure.
             Set to ``True`` only when running interactively.  Default: ``False``.
         close (bool): Call ``plt.close()`` after building the figure.
@@ -383,30 +383,17 @@ def generate_report(
     )
 
     fig = None
-    fig_daily = None
 
     if not no_plot:
-        if not daily_plot_only:
-            fig = report.plot_agp(show=show, close=close)
+        if daily_plot_only:
+            fig = report.plot_daily(output=output, show=show, close=close)
+        else:
+            fig = report.plot_agp(show=show, close=close, daily_plot=daily_plot)
             if pdf:
                 pdf_path = output.rsplit(".", 1)[0] + ".pdf"
                 png_to_pdf(output, pdf_path)
                 if verbose:
                     print(f"PDF saved to: {pdf_path}")
-
-        if daily_plot or daily_plot_only:
-            fig_daily = report.plot_daily(show=show, close=close)
-            if pdf:
-                base_output = output
-                if "." in base_output:
-                    base, ext = base_output.rsplit(".", 1)
-                else:
-                    base, ext = base_output, "png"
-                daily_png = f"{base}_daily.{ext}"
-                daily_pdf_path = f"{base}_daily.pdf"
-                png_to_pdf(daily_png, daily_pdf_path)
-                if verbose:
-                    print(f"Daily PDF saved to: {daily_pdf_path}")
     elif verbose:
         print("Plot generation skipped (no_plot=True)")
 
@@ -415,4 +402,4 @@ def generate_report(
     if export:
         report.export(export)
 
-    return fig_daily if daily_plot_only else fig
+    return fig
