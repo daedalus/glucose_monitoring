@@ -4,11 +4,9 @@ import pandas as pd
 trapz = np.trapezoid if hasattr(np, "trapezoid") else np.trapz
 
 
-def compute_mage(series):
+def compute_excursions(series):
     s = series.rolling(3, center=True).mean().dropna().values
-    if len(s) < 3:
-        return np.nan
-
+    
     sd = np.std(s, ddof=0)
     diffs = np.diff(s)
     signs = np.sign(diffs)
@@ -23,7 +21,14 @@ def compute_mage(series):
         delta = abs(s[turning[i]] - s[turning[i - 1]])
         if delta > sd:
             excursions.append(delta)
+    return excursions
 
+
+def compute_mage(series):
+    """ Calculate Mean Amplitude of Glycemic Excursions """
+    if len(series) < 3:
+        return np.nan
+    excursions = compute_excursions(series)
     return np.mean(excursions) if excursions else np.nan
 
 
