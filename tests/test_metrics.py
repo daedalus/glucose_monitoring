@@ -447,7 +447,9 @@ def test_grade_capped_at_50_for_extreme_values(cfg):
 
 def test_grade_pcts_sum_to_100(glucose_df, cfg):
     result = compute_grade(glucose_df, cfg)
-    total = result["grade_hypo_pct"] + result["grade_eu_pct"] + result["grade_hyper_pct"]
+    total = (
+        result["grade_hypo_pct"] + result["grade_eu_pct"] + result["grade_hyper_pct"]
+    )
     assert total == pytest.approx(100.0, abs=1e-6)
 
 

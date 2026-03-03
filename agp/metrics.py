@@ -238,7 +238,9 @@ def compute_hourly_tir(df, cfg):
     LOW = cfg["LOW"]
     HIGH = cfg["HIGH"]
 
-    in_range = (df["Sensor Reading(mg/dL)"] >= LOW) & (df["Sensor Reading(mg/dL)"] <= HIGH)
+    in_range = (df["Sensor Reading(mg/dL)"] >= LOW) & (
+        df["Sensor Reading(mg/dL)"] <= HIGH
+    )
     hours = df["Time"].dt.hour
 
     tir_by_hour = []
@@ -264,13 +266,15 @@ def compute_lability_index(df, cfg):
     dt_hours = np.diff(times.astype("datetime64[s]")).astype(float) / 3600.0
     dg = np.diff(glucose)
 
-    time_diff_s = (times[-1].astype("datetime64[s]") - times[0].astype("datetime64[s]")).astype(float)
+    time_diff_s = (
+        times[-1].astype("datetime64[s]") - times[0].astype("datetime64[s]")
+    ).astype(float)
     total_hours = float(time_diff_s / 3600.0)
     if total_hours == 0:
         return {"lability_index": np.nan}
 
     valid = dt_hours > 0
-    li = float(np.sum(dg[valid]**2 / dt_hours[valid]) / total_hours)
+    li = float(np.sum(dg[valid] ** 2 / dt_hours[valid]) / total_hours)
     return {"lability_index": li}
 
 

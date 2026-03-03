@@ -203,7 +203,9 @@ def test_agp_plot_dark_mode_axes_facecolor(df_with_roc, cfg, report_header):
         assert actual == _DARK_BG, f"Axes facecolor {actual!r} != {_DARK_BG!r}"
 
 
-def test_agp_plot_savefig_receives_dark_facecolor(df_with_roc, cfg, report_header, tmp_path):
+def test_agp_plot_savefig_receives_dark_facecolor(
+    df_with_roc, cfg, report_header, tmp_path
+):
     """savefig must be called with facecolor=_fig_fc so dark background is preserved on disk."""
     import matplotlib.colors as mcolors
     from unittest.mock import call
@@ -222,7 +224,9 @@ def test_agp_plot_savefig_receives_dark_facecolor(df_with_roc, cfg, report_heade
     assert actual == _DARK_FIG
 
 
-def test_daily_plot_savefig_receives_dark_facecolor(df_with_roc, cfg, report_header, tmp_path):
+def test_daily_plot_savefig_receives_dark_facecolor(
+    df_with_roc, cfg, report_header, tmp_path
+):
     """generate_daily_plot savefig must also carry facecolor=_fig_fc in dark mode."""
     import matplotlib.colors as mcolors
 

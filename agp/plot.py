@@ -73,8 +73,8 @@ def _draw_daily_axes(ax, df, cfg, dark=False):
         cfg: Configuration dict from :func:`build_config`.
         dark: When ``True``, apply dark-mode colour palette. Default: ``False``.
     """
-    _fg        = "#cdd6f4" if dark else "black"
-    _grid_col  = "#45475a" if dark else "gray"
+    _fg = "#cdd6f4" if dark else "black"
+    _grid_col = "#45475a" if dark else "gray"
 
     VERY_LOW = cfg["VERY_LOW"]
     LOW = cfg["LOW"]
@@ -162,7 +162,8 @@ def _draw_daily_axes(ax, df, cfg, dark=False):
     # band_handles come from axhspan/axhline calls; keep only the named ones
     date_labels = {str(d) for d in dates}
     named = [
-        (h, lbl) for h, lbl in zip(band_handles, band_labels)
+        (h, lbl)
+        for h, lbl in zip(band_handles, band_labels)
         if not lbl.startswith("_") and lbl not in date_labels
     ]
     band_h = [h for h, _ in named]
@@ -221,9 +222,15 @@ def _build_stats_text(metrics, cfg) -> str:
     gri_txt = metrics["gri_txt"]
     adrr = metrics["adrr"]
     time_weighted_avg = metrics["time_weighted_avg"]
-    exposure_severity_to_hyperglycemia_pct = metrics["exposure_severity_to_hyperglycemia_pct"]
-    exposure_severity_to_hypoglycemia_pct = metrics["exposure_severity_to_hypoglycemia_pct"]
-    exposure_severity_to_severe_hypoglycemia_pct = metrics["exposure_severity_to_severe_hypoglycemia_pct"]
+    exposure_severity_to_hyperglycemia_pct = metrics[
+        "exposure_severity_to_hyperglycemia_pct"
+    ]
+    exposure_severity_to_hypoglycemia_pct = metrics[
+        "exposure_severity_to_hypoglycemia_pct"
+    ]
+    exposure_severity_to_severe_hypoglycemia_pct = metrics[
+        "exposure_severity_to_severe_hypoglycemia_pct"
+    ]
     days_of_data = metrics["days_of_data"]
     readings_per_day = metrics["readings_per_day"]
     wear_percentage = metrics["wear_percentage"]
@@ -298,9 +305,7 @@ def _build_stats_text(metrics, cfg) -> str:
         f"GRADE: {fmt(grade)}  (Hypo: {fmt(grade_hypo_pct)}%  Eu: {fmt(grade_eu_pct)}%  Hyper: {fmt(grade_hyper_pct)}%)\n"
         f"Hypo Index: {fmt(hypo_index, 2)}  Hyper Index: {fmt(hyper_index, 2)}\n\n"
         f"HOURLY TIR (00→23):\n"
-        + "|".join(
-            str(int(v)) if not np.isnan(v) else "--" for v in tir_by_hour
-        )
+        + "|".join(str(int(v)) if not np.isnan(v) else "--" for v in tir_by_hour)
     )
 
 
@@ -412,34 +417,34 @@ def _add_figure_texts(report_header: dict, date_range_str: str, fg_color: str):
 
 
 SCATTER_RANGES = [
-    ("Tight Target",  8,  0.4, "none",  None),
-    ("Above Tight",  10,  0.5, "none",  None),
-    ("High",         12,  0.6, "none",  None),
-    ("Very High",    12,  0.7, "none",  None),
-    ("Low",          15,  0.8, "black", 0.5),
-    ("Very Low",     20,  1.0, "black", 0.8),
+    ("Tight Target", 8, 0.4, "none", None),
+    ("Above Tight", 10, 0.5, "none", None),
+    ("High", 12, 0.6, "none", None),
+    ("Very High", 12, 0.7, "none", None),
+    ("Low", 15, 0.8, "black", 0.5),
+    ("Very Low", 20, 1.0, "black", 0.8),
 ]
 
 
 def _resolve_theme(dark: bool) -> dict:
     """Return colour tokens for dark or light theme."""
     return {
-        "bg":        "#1e1e2e" if dark else "white",
-        "fg":        "#cdd6f4" if dark else "black",
-        "grid_col":  "#45475a" if dark else "gray",
-        "box_fc":    "#313244" if dark else "white",
-        "box_ec":    "#89b4fa" if dark else "gray",
-        "box_alpha": 0.85      if dark else 0.35,
-        "fig_fc":    "#1e1e2e" if dark else "white",
+        "bg": "#1e1e2e" if dark else "white",
+        "fg": "#cdd6f4" if dark else "black",
+        "grid_col": "#45475a" if dark else "gray",
+        "box_fc": "#313244" if dark else "white",
+        "box_ec": "#89b4fa" if dark else "gray",
+        "box_alpha": 0.85 if dark else 0.35,
+        "fig_fc": "#1e1e2e" if dark else "white",
     }
 
 
 def _tag_glucose_ranges(df, cfg):
     """Return a copy of *df* with a ``glucose_range`` categorical column."""
-    VERY_LOW  = cfg["VERY_LOW"]
+    VERY_LOW = cfg["VERY_LOW"]
     TIGHT_LOW = cfg["TIGHT_LOW"]
     TIGHT_HIGH = cfg["TIGHT_HIGH"]
-    HIGH      = cfg["HIGH"]
+    HIGH = cfg["HIGH"]
     VERY_HIGH = cfg["VERY_HIGH"]
     df = df.copy()
     df["glucose_range"] = pd.cut(
@@ -452,11 +457,11 @@ def _tag_glucose_ranges(df, cfg):
 
 def _draw_distribution_bar(ax_bar, metrics, cfg, theme: dict):
     """Draw the stacked glucose-distribution bar chart onto *ax_bar*."""
-    VERY_LOW  = cfg["VERY_LOW"]
-    LOW       = cfg["LOW"]
-    HIGH      = cfg["HIGH"]
+    VERY_LOW = cfg["VERY_LOW"]
+    LOW = cfg["LOW"]
+    HIGH = cfg["HIGH"]
     VERY_HIGH = cfg["VERY_HIGH"]
-    TIGHT_LOW  = cfg["TIGHT_LOW"]
+    TIGHT_LOW = cfg["TIGHT_LOW"]
     TIGHT_HIGH = cfg["TIGHT_HIGH"]
 
     percentages = [
@@ -541,8 +546,8 @@ def _draw_distribution_bar(ax_bar, metrics, cfg, theme: dict):
 def _draw_agp_panel(ax1, ax_stats, result, metrics, cfg, theme: dict):
     """Draw the main AGP panel and stats text box; return ``(ax1, ax2)``."""
     mean_glucose = metrics["mean_glucose"]
-    trend_arrow  = metrics["trend_arrow"]
-    trend_color  = metrics["trend_color"]
+    trend_arrow = metrics["trend_arrow"]
+    trend_color = metrics["trend_color"]
 
     x = result["minutes"]
 
@@ -585,7 +590,6 @@ def _draw_agp_panel(ax1, ax_stats, result, metrics, cfg, theme: dict):
         color="orange",
     )
     ax2.set_ylabel("")
-
 
     xticks = np.arange(0, 1441, 120)
     ax1.set_xticks(xticks)
@@ -652,8 +656,8 @@ def _draw_agp_panel(ax1, ax_stats, result, metrics, cfg, theme: dict):
 def _draw_raw_scatter(ax3, df, metrics, cfg, theme: dict):
     """Draw the color-coded raw glucose scatter plot onto *ax3*."""
     days_of_data = metrics["days_of_data"]
-    trend_arrow  = metrics["trend_arrow"]
-    trend_color  = metrics["trend_color"]
+    trend_arrow = metrics["trend_arrow"]
+    trend_color = metrics["trend_color"]
 
     range_colors = {
         "Very Low": "darkred",
@@ -864,17 +868,17 @@ def generate_agp_plot(
     Returns:
         matplotlib.figure.Figure: The completed AGP figure.
     """
-    dark  = getattr(args, "dark_mode", False)
+    dark = getattr(args, "dark_mode", False)
     theme = _resolve_theme(dark)
-    df    = _tag_glucose_ranges(df, cfg)
+    df = _tag_glucose_ranges(df, cfg)
 
     fig, gs = _make_figure_and_gridspec(
         heatmap=getattr(args, "heatmap", False), daily_plot=daily_plot
     )
 
     # --- TOP ROW ---
-    ax_bar   = fig.add_subplot(gs[0, :2])
-    ax1      = fig.add_subplot(gs[0, 2:9])
+    ax_bar = fig.add_subplot(gs[0, :2])
+    ax1 = fig.add_subplot(gs[0, 2:9])
     ax_stats = fig.add_subplot(gs[0, 9:])
 
     _draw_distribution_bar(ax_bar, metrics, cfg, theme)
@@ -943,7 +947,7 @@ def generate_daily_plot(
         matplotlib.figure.Figure: The completed daily overlay figure.
     """
     dark = getattr(args, "dark_mode", False)
-    _fg_d   = "#cdd6f4" if dark else "black"
+    _fg_d = "#cdd6f4" if dark else "black"
     _fig_fc = "#1e1e2e" if dark else "white"
 
     fig, ax = plt.subplots(figsize=(14, 7))
@@ -998,7 +1002,13 @@ def generate_daily_plot(
         else getattr(args, "daily_plot_output", None)
     )
     if _save_path:
-        plt.savefig(_save_path, dpi=300, bbox_inches="tight", metadata=metadata, facecolor=_fig_fc)
+        plt.savefig(
+            _save_path,
+            dpi=300,
+            bbox_inches="tight",
+            metadata=metadata,
+            facecolor=_fig_fc,
+        )
         if getattr(args, "verbose", False):
             print(f"Daily plot saved to: {_save_path}")
     if show:

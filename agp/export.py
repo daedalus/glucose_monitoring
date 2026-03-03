@@ -92,7 +92,9 @@ def export_metrics(metrics, export_path, report_header=None, verbose=False):
             "hyper_index": round(metrics["hyper_index"], 4),
             "gvp": round(gvp, 2) if not np.isnan(gvp) else None,
             "tir_by_hour": metrics["tir_by_hour"],
-            "lability_index": round(lability_index, 4) if not np.isnan(lability_index) else None,
+            "lability_index": (
+                round(lability_index, 4) if not np.isnan(lability_index) else None
+            ),
             "cv_rate": round(cv_rate, 2) if not np.isnan(cv_rate) else None,
         }
     )
