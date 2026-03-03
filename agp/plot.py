@@ -600,7 +600,7 @@ def _draw_agp_panel(ax1, ax_stats, result, metrics, cfg, theme: dict):
         0.02,
         0.99,
         textstr,
-        fontsize=7.5,
+        fontsize=6.6,
         verticalalignment="top",
         horizontalalignment="left",
         transform=ax_stats.transAxes,
