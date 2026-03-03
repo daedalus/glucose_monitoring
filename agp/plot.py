@@ -160,8 +160,10 @@ def _draw_daily_axes(ax, df, cfg, dark=False):
     ]
     band_handles, band_labels = ax.get_legend_handles_labels()
     # band_handles come from axhspan/axhline calls; keep only the named ones
+    date_labels = {str(d) for d in dates}
     named = [
-        (h, lbl) for h, lbl in zip(band_handles, band_labels) if not lbl.startswith("_")
+        (h, lbl) for h, lbl in zip(band_handles, band_labels)
+        if not lbl.startswith("_") and lbl not in date_labels
     ]
     band_h = [h for h, _ in named]
     band_l = [lbl for _, lbl in named]

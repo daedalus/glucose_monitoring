@@ -238,6 +238,22 @@ def test_daily_plot_savefig_receives_dark_facecolor(df_with_roc, cfg, report_hea
     assert actual == _DARK_FIG
 
 
+def test_daily_overlay_legend_no_duplicate_labels(df_with_roc, cfg, report_header):
+    """Legend in the daily overlay must not contain duplicate labels."""
+    args = _make_plot_args()
+    with (
+        patch("matplotlib.pyplot.savefig"),
+        patch("matplotlib.pyplot.show"),
+        patch("matplotlib.pyplot.close"),
+    ):
+        fig = generate_daily_plot(df_with_roc, cfg, args, report_header)
+
+    ax = fig.get_axes()[0]
+    legend = ax.get_legend()
+    labels = [t.get_text() for t in legend.get_texts()]
+    assert len(labels) == len(set(labels)), f"Duplicate legend labels found: {labels}"
+
+
 def test_agp_plot_light_mode_figure_facecolor(df_with_roc, cfg, report_header):
     """In light mode, figure facecolor must remain white."""
     result = build_agp_profile(df_with_roc, cfg)
